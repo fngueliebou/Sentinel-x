@@ -1,0 +1,8 @@
+{
+  "note": "Sample scenarios for the first slice ONLY. Ground truth is the expected deterministic disposition. This is NOT a scientific benchmark (see docs/EVALUATION.md); real evaluation uses public datasets with held-out splits.",
+  "scenarios": [
+    {"alert_file": "data/alerts/sample_alert_bruteforce.json", "expected_disposition": "escalate"},
+    {"alert_file": "data/alerts/sample_alert_ambiguous.json", "expected_disposition": "insufficient_evidence"},
+    {"alert_file": "data/alerts/sample_alert_injection.json", "expected_disposition": "escalate"}
+  ]
+}

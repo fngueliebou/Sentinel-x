@@ -1,0 +1,142 @@
+"""Offline, rule-based stand-in for an LLM analyst.
+
+Why this exists: it lets the full end-to-end slice run and be tested with no API
+key and no network, and it gives the evaluation harness a reproducible reference.
+It is NOT a language model and makes no NLU claims.
+
+Grounding guarantee (by construction): every FACT it emits cites an evidence id
+that is present in the request's evidence set. It derives its disposition only
+from STRUCTURED signals (counts of failed-auth events), never from the free-text
+content of events — so injected instructions inside event text cannot change its
+decision. This is a property of the stub, not evidence that a real LLM is robust.
+"""
+
+from __future__ import annotations
+
+from sentinelx.llm.base import AnalysisRequest, ProviderOutput, ProviderUsage
+from sentinelx.schemas import (
+    Citation,
+    Disposition,
+    Evidence,
+    Finding,
+    FindingKind,
+    SourceType,
+)
+
+_BRUTE_FORCE_THRESHOLD = 5
+
+
+def _is_failed_auth(ev: Evidence) -> bool:
+    c = ev.content.lower()
+    return "fail" in c or "authentication failure" in c
+
+
+class DeterministicProvider:
+    name = "deterministic"
+
+    def analyze(self, request: AnalysisRequest) -> ProviderOutput:
+        event_ev = [e for e in request.evidence if e.source_type == SourceType.EVENT]
+        kb_ev = [e for e in request.evidence if e.source_type == SourceType.KNOWLEDGE]
+
+        facts: list[Finding] = []
+        failed_auth_ids: list[str] = []
+        for ev in event_ev:
+            # One grounded fact per event, citing exactly that event.
+            facts.append(
+                Finding(
+                    kind=FindingKind.FACT,
+                    statement=f"Telemetry event recorded: {ev.content}",
+                    citations=[Citation(evidence_id=ev.id)],
+                )
+            )
+            if _is_failed_auth(ev):
+                failed_auth_ids.append(ev.id)
+
+        # A grounded aggregate fact (only if there are failed-auth events to cite).
+        if failed_auth_ids:
+            facts.append(
+                Finding(
+                    kind=FindingKind.FACT,
+                    statement=(
+                        f"{len(failed_auth_ids)} failed-authentication event(s) observed."
+                    ),
+                    citations=[Citation(evidence_id=i) for i in failed_auth_ids],
+                )
+            )
+
+        # Hypotheses come from retrieved knowledge (empty when RAG is disabled).
+        hypotheses: list[Finding] = []
+        recommendations: list[Finding] = []
+        for ev in kb_ev:
+            hypotheses.append(
+                Finding(
+                    kind=FindingKind.HYPOTHESIS,
+                    statement=(
+                        "Observed activity may relate to: "
+                        f"{ev.source_ref}. See retrieved knowledge."
+                    ),
+                    citations=[Citation(evidence_id=ev.id)],
+                )
+            )
+            if "scanner" in ev.content.lower() or "benign" in ev.content.lower():
+                recommendations.append(
+                    Finding(
+                        kind=FindingKind.RECOMMENDATION,
+                        statement=(
+                            "Check the source address against the approved-scanner "
+                            "inventory (read-only) before escalating."
+                        ),
+                        citations=[Citation(evidence_id=ev.id)],
+                    )
+                )
+
+        # Unknowns: acknowledged gaps (missing fields + no-telemetry case).
+        unknowns: list[Finding] = [
+            Finding(kind=FindingKind.UNKNOWN, statement=f"Missing field in alert: {m}")
+            for m in request.alert.missing_fields
+        ]
+        if not event_ev:
+            unknowns.append(
+                Finding(
+                    kind=FindingKind.UNKNOWN,
+                    statement="No telemetry events available to substantiate the alert.",
+                )
+            )
+
+        # Default read-only recommendation.
+        if event_ev:
+            recommendations.append(
+                Finding(
+                    kind=FindingKind.RECOMMENDATION,
+                    statement="Review the cited authentication events for the affected entity.",
+                    citations=[Citation(evidence_id=event_ev[0].id)],
+                )
+            )
+
+        # Disposition from STRUCTURED signal only.
+        if not event_ev:
+            disposition = Disposition.INSUFFICIENT_EVIDENCE
+            summary = "No telemetry available; cannot substantiate a disposition."
+        elif len(failed_auth_ids) >= _BRUTE_FORCE_THRESHOLD:
+            disposition = Disposition.ESCALATE
+            summary = (
+                f"{len(failed_auth_ids)} failed-authentication events exceed the "
+                f"brute-force threshold ({_BRUTE_FORCE_THRESHOLD}); escalate for review."
+            )
+        else:
+            disposition = Disposition.INSUFFICIENT_EVIDENCE
+            summary = (
+                "Telemetry present but no deterministic rule justifies escalation; "
+                "evidence insufficient for a confident disposition."
+            )
+
+        return ProviderOutput(
+            disposition=disposition,
+            summary=summary,
+            facts=facts,
+            hypotheses=hypotheses,
+            unknowns=unknowns,
+            recommendations=recommendations,
+            model="deterministic-v1",
+            usage=ProviderUsage(input_tokens=None, output_tokens=None, cost_usd=0.0),
+        )

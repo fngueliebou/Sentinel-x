@@ -1,0 +1,31 @@
+# PostgreSQL + pgvector for SENTINEL-X.
+# SCAFFOLD: the default in-memory knowledge store does NOT require this service.
+# It is provided so the pgvector adapter (see src/sentinelx/knowledge/pgvector_store.py,
+# not yet wired into the pipeline) can be developed against a real database.
+#
+# Usage:
+#   export POSTGRES_PASSWORD=choose-a-strong-value   # never commit this
+#   docker compose up -d
+#
+# No password is baked into this file on purpose.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: sentinelx-db
+    environment:
+      POSTGRES_DB: ${SENTINELX_DB_NAME:-sentinelx}
+      POSTGRES_USER: ${SENTINELX_DB_USER:-sentinelx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in your shell or .env}
+    ports:
+      - "${SENTINELX_DB_PORT:-5432}:5432"
+    volumes:
+      - sentinelx_pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SENTINELX_DB_USER:-sentinelx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  sentinelx_pgdata:

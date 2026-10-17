@@ -1,0 +1,13 @@
+{
+  "id": "ALERT-0002",
+  "source": "suricata",
+  "timestamp": "2026-10-17T09:15:00Z",
+  "title": "Single failed login then success for user asmith",
+  "severity": "medium",
+  "description": "One failed authentication followed by a success. Could be a typo or misuse of valid account.",
+  "entities": ["user:asmith", "host:srv02"],
+  "events": [
+    {"id": "e1", "timestamp": "2026-10-17T09:14:50Z", "source": "auth", "entity": "user:asmith", "action": "login_failed", "message": "Failed password for asmith from 198.51.100.7 ssh2"},
+    {"id": "e2", "timestamp": "2026-10-17T09:15:00Z", "source": "auth", "entity": "user:asmith", "action": "login_success", "message": "Accepted password for asmith from 198.51.100.7 ssh2"}
+  ]
+}

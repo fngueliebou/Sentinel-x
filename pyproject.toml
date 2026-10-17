@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinelx"
+version = "0.1.0"
+description = "SENTINEL-X — open-source AI-assisted SOC investigation platform (early skeleton)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "TBD — see docs/decisions (D5)" }
+authors = [{ name = "SENTINEL-X" }]
+
+# Core runtime dependencies are intentionally minimal.
+# The first end-to-end slice runs with ONLY these (no DB, no external LLM).
+dependencies = [
+    "pydantic>=2.7,<3",
+    "pydantic-settings>=2.2,<3",
+]
+
+[project.optional-dependencies]
+# Real LLM provider (optional; not exercised by the test suite).
+llm = ["anthropic>=0.39"]
+# HTTP API layer (scaffold; not required for the CLI slice).
+api = ["fastapi>=0.111", "uvicorn>=0.30"]
+# PostgreSQL + pgvector adapter (scaffold; in-memory store is the default).
+db = ["psycopg[binary]>=3.1", "pgvector>=0.3"]
+# Development / testing.
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+sentinelx = "sentinelx.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

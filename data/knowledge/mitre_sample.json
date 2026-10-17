@@ -1,0 +1,43 @@
+{
+  "source": "SENTINEL-X sample knowledge",
+  "note": "Original summaries written for SENTINEL-X. Technique identifiers reference the MITRE ATT&CK framework (attribution: MITRE ATT&CK, https://attack.mitre.org). No ATT&CK prose is copied; these are paraphrased, redistributable stubs for the first slice only.",
+  "version": "sample-2026-10-17",
+  "documents": [
+    {
+      "id": "KB-T1110",
+      "source": "MITRE ATT&CK",
+      "source_ref": "T1110",
+      "source_url": "https://attack.mitre.org/techniques/T1110/",
+      "source_version": "sample-2026-10-17",
+      "title": "Brute Force (T1110)",
+      "text": "Brute force covers attempts to guess account credentials through many trials. A burst of failed authentications from a single source against one or many accounts, sometimes followed by a success, is a common signal. Sub-techniques include password guessing, password spraying and credential stuffing."
+    },
+    {
+      "id": "KB-T1078",
+      "source": "MITRE ATT&CK",
+      "source_ref": "T1078",
+      "source_url": "https://attack.mitre.org/techniques/T1078/",
+      "source_version": "sample-2026-10-17",
+      "title": "Valid Accounts (T1078)",
+      "text": "Adversaries may use legitimate credentials to log in. A successful authentication immediately after many failures, or a login from an unusual source or time for the account, can indicate misuse of valid accounts rather than a benign login."
+    },
+    {
+      "id": "KB-T1021",
+      "source": "MITRE ATT&CK",
+      "source_ref": "T1021",
+      "source_url": "https://attack.mitre.org/techniques/T1021/",
+      "source_version": "sample-2026-10-17",
+      "title": "Remote Services (T1021)",
+      "text": "Lateral movement via remote services (such as SSH or RDP) uses valid sessions to reach other hosts. Authentication to multiple internal hosts from one account in a short window can indicate lateral movement."
+    },
+    {
+      "id": "KB-TRIAGE-FP",
+      "source": "SENTINEL-X runbook",
+      "source_ref": "RB-FP-SCANNER",
+      "source_url": null,
+      "source_version": "sample-2026-10-17",
+      "title": "Known benign: vulnerability scanners",
+      "text": "Scheduled internal vulnerability scanners can generate authentication failures and connection bursts that resemble attacks. Before escalating, check whether the source address belongs to an approved scanner inventory; if so the activity is typically a benign positive."
+    }
+  ]
+}

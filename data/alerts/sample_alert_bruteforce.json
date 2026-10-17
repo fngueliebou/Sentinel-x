@@ -1,0 +1,17 @@
+{
+  "id": "ALERT-0001",
+  "source": "wazuh",
+  "timestamp": "2026-10-17T08:00:10Z",
+  "title": "Multiple failed SSH logins for user jdoe",
+  "severity": "high",
+  "description": "Repeated authentication failures from a single source IP.",
+  "entities": ["user:jdoe", "host:srv01", "ip:203.0.113.10"],
+  "events": [
+    {"id": "e1", "timestamp": "2026-10-17T08:00:01Z", "source": "auth", "entity": "user:jdoe", "action": "login_failed", "message": "Failed password for jdoe from 203.0.113.10 port 51514 ssh2"},
+    {"id": "e2", "timestamp": "2026-10-17T08:00:03Z", "source": "auth", "entity": "user:jdoe", "action": "login_failed", "message": "Failed password for jdoe from 203.0.113.10 port 51516 ssh2"},
+    {"id": "e3", "timestamp": "2026-10-17T08:00:05Z", "source": "auth", "entity": "user:jdoe", "action": "login_failed", "message": "Failed password for jdoe from 203.0.113.10 port 51520 ssh2"},
+    {"id": "e4", "timestamp": "2026-10-17T08:00:07Z", "source": "auth", "entity": "user:jdoe", "action": "login_failed", "message": "Failed password for jdoe from 203.0.113.10 port 51522 ssh2"},
+    {"id": "e5", "timestamp": "2026-10-17T08:00:09Z", "source": "auth", "entity": "user:jdoe", "action": "login_failed", "message": "Failed password for jdoe from 203.0.113.10 port 51524 ssh2"},
+    {"id": "e6", "timestamp": "2026-10-17T08:00:11Z", "source": "auth", "entity": "user:jdoe", "action": "login_failed", "message": "Failed password for jdoe from 203.0.113.10 port 51530 ssh2"}
+  ]
+}
