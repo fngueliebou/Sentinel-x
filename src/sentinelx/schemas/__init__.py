@@ -15,6 +15,9 @@ from sentinelx.schemas.report import (
     TriageDecision,
 )
 
+from sentinelx.schemas.scenario import Scenario
+
+
 __all__ = [
     "Disposition",
     "FindingKind",
@@ -28,4 +31,5 @@ __all__ = [
     "Finding",
     "InvestigationReport",
     "TriageDecision",
+    "Scenario",
 ]

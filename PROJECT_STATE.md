@@ -20,7 +20,8 @@ Canonical status file (project instructions §7). Updated at each significant st
 - Independent citation verification (dangling citations caught).
 - Untrusted-data flagging; injection does not change the stub's decision.
 - Evaluation harness: baselines A/B/C + run manifest.
-- **27/27 tests pass** (`pytest`). CLI and editable install verified.
+- Scenario ground-truth contract (`schemas/scenario.py`), exported via \`schemas/\_\_init\_\_.py\`, with the first scenario data file (`data/scenarios/scenario_bruteforce.json`) and loader test.
+- **34/34 tests pass** (`pytest`). CLI and editable install verified.
 
 ## In progress / next candidates
 
@@ -48,5 +49,7 @@ D7 network datasets scope · D8 BM25 scoring.
 
 ## Next immediate task (proposed, not started)
 
-Either (a) `docs/THREAT_MODEL.md`, or (b) implement the read-only tool-use step (N3)
-with its tests to unlock baseline D. Awaiting user direction.
+Scenario contract + first scenario done. Next candidates: (a) migrate the two
+remaining sample alerts to the Scenario format; (b) dataset manifest system +
+reproducible GUIDE subset acquisition (no dataset committed); (c) `docs/THREAT_MODEL.md`.
+Awaiting user direction.
