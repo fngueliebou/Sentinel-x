@@ -20,8 +20,12 @@ Canonical status file (project instructions §7). Updated at each significant st
 - Independent citation verification (dangling citations caught).
 - Untrusted-data flagging; injection does not change the stub's decision.
 - Evaluation harness: baselines A/B/C + run manifest.
-- Scenario ground-truth contract (`schemas/scenario.py`), exported via \`schemas/\_\_init\_\_.py\`, with the first scenario data file (`data/scenarios/scenario_bruteforce.json`) and loader test.
-- **34/34 tests pass** (`pytest`). CLI and editable install verified.
+- Scenario ground-truth contract (`schemas/scenario.py`), exported via `schemas/__init__.py`, with three scenario data files (`data/scenarios/`) and a parametrized loader test.
+- Cleanup: brute-force threshold centralized in `constants.py` (DRY); deterministic provider emits the scanner-check recommendation once, from scanner knowledge only.
+- `DatasetManifest` contract + tests (`schemas/dataset_manifest.py`), exported via `schemas/__init__.py` (license name kept separate from verification status).
+- `DATASETS.md`: registry of candidate datasets and RAG knowledge sources — all
+  licenses marked **unverified**, **no data downloaded**, nothing verified claimed as fact.
+- **48/48 tests pass** (`pytest`), CLI and editable install verified.
 
 ## In progress / next candidates
 
@@ -49,7 +53,4 @@ D7 network datasets scope · D8 BM25 scoring.
 
 ## Next immediate task (proposed, not started)
 
-Scenario contract + first scenario done. Next candidates: (a) migrate the two
-remaining sample alerts to the Scenario format; (b) dataset manifest system +
-reproducible GUIDE subset acquisition (no dataset committed); (c) `docs/THREAT_MODEL.md`.
-Awaiting user direction.
+Dataset manifest contract + registry done (B-1/B-2). Next (B-3): decide which retained datasets to acquire and in what order (GUIDE and AIT are the two core pillars), then build a reproducible acquisition script writing only to the git-ignored `data/external/` (verify licenses first; commit no data). Awaiting user direction on dataset selection.

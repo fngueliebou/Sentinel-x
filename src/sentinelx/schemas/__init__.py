@@ -16,6 +16,13 @@ from sentinelx.schemas.report import (
 )
 
 from sentinelx.schemas.scenario import Scenario
+from sentinelx.schemas.dataset_manifest import (
+    DatasetManifest,
+    DatasetRole,
+    DatasetStatus,
+    LicenseInfo,
+    LicenseVerification,
+)
 
 
 __all__ = [
@@ -32,4 +39,9 @@ __all__ = [
     "InvestigationReport",
     "TriageDecision",
     "Scenario",
+    "DatasetManifest",
+    "DatasetRole",
+    "DatasetStatus",
+    "LicenseInfo",
+    "LicenseVerification",
 ]
