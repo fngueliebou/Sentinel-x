@@ -7,6 +7,7 @@ justify a decision, rather than defaulting to dismiss/escalate.
 
 from __future__ import annotations
 
+from sentinelx.constants import BRUTE_FORCE_FAILED_AUTH_THRESHOLD
 from sentinelx.schemas import Disposition, NormalizedAlert, Severity, TriageDecision
 
 _SEVERITY_PRIORITY: dict[Severity, int] = {
@@ -16,9 +17,6 @@ _SEVERITY_PRIORITY: dict[Severity, int] = {
     Severity.HIGH: 75,
     Severity.CRITICAL: 90,
 }
-
-# Count of failed-auth-like events that, on its own, warrants escalation.
-_BRUTE_FORCE_THRESHOLD = 5
 
 
 def _count_failed_auth(alert: NormalizedAlert) -> int:
@@ -44,14 +42,14 @@ def triage(alert: NormalizedAlert) -> TriageDecision:
         )
 
     failed = _count_failed_auth(alert)
-    if failed >= _BRUTE_FORCE_THRESHOLD:
-        matched.append(f"failed_auth>={_BRUTE_FORCE_THRESHOLD} (observed {failed})")
+    if failed >= BRUTE_FORCE_FAILED_AUTH_THRESHOLD:
+        matched.append(f"failed_auth>={BRUTE_FORCE_FAILED_AUTH_THRESHOLD} (observed {failed})")
 
     if alert.severity in (Severity.HIGH, Severity.CRITICAL):
         matched.append(f"severity>={alert.severity.value}")
 
     priority = _SEVERITY_PRIORITY.get(alert.severity, 50)
-    if failed >= _BRUTE_FORCE_THRESHOLD:
+    if failed >= BRUTE_FORCE_FAILED_AUTH_THRESHOLD:
         priority = max(priority, 80)
 
     if matched:

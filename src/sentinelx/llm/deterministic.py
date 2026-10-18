@@ -22,8 +22,7 @@ from sentinelx.schemas import (
     FindingKind,
     SourceType,
 )
-
-_BRUTE_FORCE_THRESHOLD = 5
+from sentinelx.constants import BRUTE_FORCE_FAILED_AUTH_THRESHOLD
 
 
 def _is_failed_auth(ev: Evidence) -> bool:
@@ -117,11 +116,11 @@ class DeterministicProvider:
         if not event_ev:
             disposition = Disposition.INSUFFICIENT_EVIDENCE
             summary = "No telemetry available; cannot substantiate a disposition."
-        elif len(failed_auth_ids) >= _BRUTE_FORCE_THRESHOLD:
+        elif len(failed_auth_ids) >= BRUTE_FORCE_FAILED_AUTH_THRESHOLD:
             disposition = Disposition.ESCALATE
             summary = (
                 f"{len(failed_auth_ids)} failed-authentication events exceed the "
-                f"brute-force threshold ({_BRUTE_FORCE_THRESHOLD}); escalate for review."
+                f"brute-force threshold ({BRUTE_FORCE_FAILED_AUTH_THRESHOLD}); escalate for review."
             )
         else:
             disposition = Disposition.INSUFFICIENT_EVIDENCE
