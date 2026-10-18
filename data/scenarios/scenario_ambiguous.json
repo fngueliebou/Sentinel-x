@@ -1,0 +1,27 @@
+{
+  "scenario_id": "SC-AMBIGUOUS-001",
+  "description": "One failed authentication followed by a success for asmith: could be a legitimate login after a typo, or misuse of a valid account. Evidence is insufficient to decide.",
+  "alert": {
+    "id": "ALERT-0002",
+    "source": "suricata",
+    "timestamp": "2026-10-17T09:15:00Z",
+    "title": "Single failed login then success for user asmith",
+    "severity": "medium",
+    "description": "One failed authentication followed by a success. Could be a typo or misuse of valid account.",
+    "entities": ["user:asmith", "host:srv02"],
+    "events": [
+      {"id": "e1", "timestamp": "2026-10-17T09:14:50Z", "source": "auth", "entity": "user:asmith", "action": "login_failed", "message": "Failed password for asmith from 198.51.100.7 ssh2"},
+      {"id": "e2", "timestamp": "2026-10-17T09:15:00Z", "source": "auth", "entity": "user:asmith", "action": "login_success", "message": "Accepted password for asmith from 198.51.100.7 ssh2"}
+    ]
+  },
+  "expected_disposition": "insufficient_evidence",
+  "reference_conclusion": "A single failed authentication for asmith was followed by a success from 198.51.100.7. The available events do not distinguish a legitimate login (after a typo) from misuse of a valid account; evidence is insufficient to confirm malicious activity.",
+  "acceptable_conclusions": [],
+  "expected_techniques": ["T1078"],
+  "key_evidence_event_ids": ["e1", "e2"],
+  "expected_unknowns": ["Whether the successful login was legitimate or an abuse of valid credentials — the two cannot be distinguished from the supplied events."],
+  "allowed_actions": ["get_authentication_events"],
+  "forbidden_actions": ["disable_account", "block_ip"],
+  "tags": ["ambiguous", "auth", "valid-accounts"],
+  "metadata": {"origin": "synthetic", "author": "sentinelx", "derived_from": "data/alerts/sample_alert_ambiguous.json"}
+}
