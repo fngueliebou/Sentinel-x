@@ -66,6 +66,7 @@ class DeterministicProvider:
         # Hypotheses come from retrieved knowledge (empty when RAG is disabled).
         hypotheses: list[Finding] = []
         recommendations: list[Finding] = []
+        scanner_check_added = False
         for ev in kb_ev:
             hypotheses.append(
                 Finding(
@@ -77,7 +78,10 @@ class DeterministicProvider:
                     citations=[Citation(evidence_id=ev.id)],
                 )
             )
-            if "scanner" in ev.content.lower() or "benign" in ev.content.lower():
+            # Recommend the approved-scanner check once, and only for knowledge that
+            # is actually about scanners (match "scanner", not merely "benign" in an
+            # unrelated sentence). This removes a duplicate/false-positive reco.
+            if not scanner_check_added and "scanner" in ev.content.lower():
                 recommendations.append(
                     Finding(
                         kind=FindingKind.RECOMMENDATION,
@@ -88,6 +92,7 @@ class DeterministicProvider:
                         citations=[Citation(evidence_id=ev.id)],
                     )
                 )
+                scanner_check_added = True
 
         # Unknowns: acknowledged gaps (missing fields + no-telemetry case).
         unknowns: list[Finding] = [
