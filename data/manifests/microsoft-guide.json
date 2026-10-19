@@ -1,0 +1,27 @@
+{
+  "dataset_id": "microsoft-guide",
+  "name": "Microsoft Security Incident Prediction (GUIDE)",
+  "roles": ["triage"],
+  "status": "acquired",
+  "source_url": "https://www.kaggle.com/datasets/Microsoft/microsoft-security-incident-prediction",
+  "provenance": "Real-world anonymized Microsoft SOC incidents with customer-analyst triage labels; released on Kaggle by Microsoft.",
+  "citation": "Companion paper: 'AI-Driven Guided Response for Security Operation Centers with Microsoft Copilot for Security', arXiv:2407.09017.",
+  "license": {
+    "name": "CDLA-Permissive-2.0",
+    "verification": "verified",
+    "source_url": "https://cdla.dev/permissive-2-0/",
+    "notes": "Community Data License Agreement - Permissive 2.0; verified on the official Kaggle dataset page (2026-10-19). Permissive, commercial use allowed."
+  },
+  "access_conditions": "Kaggle account required to download.",
+  "usage_conditions": "Permissive (CDLA-Permissive-2.0); crediting the data source is good practice.",
+  "redistribution_conditions": "Keep raw data under the git-ignored data/external/ (never committed).",
+  "ground_truth": "Incident-level triage grade assigned by customer analysts (true positive / benign positive / false positive).",
+  "known_limitations": [
+    "Client-provided labels are imperfect.",
+    "Strong class imbalance.",
+    "Anonymized; limited raw semantics."
+  ],
+  "local_path": "data/external/microsoft-guide",
+  "local_checksum": "sha256:e1ce0353bae3890adad3a52c93ea64030f549a419527086256a2af310fb68d24",
+  "tags": ["microsoft", "guide", "triage", "3-files", "3.3GiB"]
+}

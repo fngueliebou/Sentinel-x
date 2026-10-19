@@ -1,0 +1,27 @@
+{
+  "dataset_id": "ait-ads",
+  "name": "AIT Alert Data Set",
+  "roles": ["investigation"],
+  "status": "acquired",
+  "source_url": "https://zenodo.org/records/8263181",
+  "version": "1",
+  "provenance": "Alerts produced by Suricata, Wazuh and AMiner over the AIT-LDSv2 testbeds; published on Zenodo (record 8263181). Generation code: github.com/ait-aecid/alert-data-set.",
+  "citation": "AIT Alert Data Set, Zenodo record 8263181, DOI 10.5281/zenodo.8263181, published 2023-08-18.",
+  "license": {
+    "name": "CC BY 4.0",
+    "verification": "verified",
+    "source_url": "https://zenodo.org/records/8263181",
+    "notes": "Attribution only; verified on the official Zenodo record page (2026-10-19). No NonCommercial/ShareAlike constraint on the alerts (unlike the AIT-LDSv2 raw logs)."
+  },
+  "access_conditions": "Public download from Zenodo; no account required.",
+  "usage_conditions": "Attribution required (CC BY 4.0).",
+  "redistribution_conditions": "Keep raw data under the git-ignored data/external/ (never committed). Redistribution permitted with attribution.",
+  "ground_truth": "Event-level attack labels over a multi-step scenario (labels.csv).",
+  "known_limitations": [
+    "Synthetic lab testbeds, not production SOC traffic.",
+    "Alert volume and class balance depend on the detectors' configuration."
+  ],
+  "local_path": "data/external/ait-ads",
+  "local_checksum": "sha256:7b272377b837462a852c6e52f773810472ed8d428646bdabf437ae4457ed3928",
+  "tags": ["ait", "alerts", "investigation", "17-files", "2.7GiB"]
+}
