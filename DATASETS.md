@@ -5,7 +5,7 @@ Human-readable registry of datasets and knowledge sources **considered** for SEN
 ## Reading rules (honesty labels)
 
 * **Fact labels**: `[VERIFIED]` a primary/official source was checked for this fact · `[AUTHORS]` a figure announced by the dataset's authors, **not** independently reproduced · `[TO CONFIRM]` taken from a secondary source / search result, to be checked on the official page.
-* **License policy**: a license name is **not** a verified fact; each is marked **`unverified`** until independently controlled against the official source. **Update (2026-10-19):** AIT-ADS and AIT-LDSv2 licenses have been verified on their official Zenodo pages (§1.2–1.3); GUIDE remains to confirm (Kaggle sidebar).
+* **License policy**: a license name is **not** a verified fact; each is marked **`unverified`** until independently controlled against the official source. **Update (2026-10-19):** AIT-ADS and AIT-LDSv2 licenses have been verified on their official Zenodo pages (§1.2–1.3) and GUIDE on its Kaggle page (CDLA-Permissive-2.0). All three now verified.
 * **No large/restricted data is committed.** Downloaded data lives only under the git-ignored `data/external/`; nothing data-heavy enters git. Local acquisition status: GUIDE and AIT-ADS downloaded to `data/external/`; AIT-LDSv2 `_no-pcaps` kept outside the repo for now. Checksums/versions go in the per-dataset manifests (B-3b).
 
 ---
@@ -21,7 +21,7 @@ These directly serve the two evaluation families of `docs/EVALUATION.md` (triage
 * **Role**: triage/prioritization baselines on **real** SOC labels (Baseline A/B/C).
 * **Ground truth**: incident-level triage grade by customer analysts. Imperfect (client labels), strong class imbalance.
 * **Data type**: real-world SOC incidents (anonymized).
-* **License**: name `CDLA-Permissive-2.0``[TO CONFIRM — Kaggle sidebar "License" field; automated fetch could not read it, manual check required]`; **verification: unverified**.
+* **License**: `CDLA-Permissive-2.0` — **[VERIFIED]** on the official Kaggle dataset page (License field, [https://cdla.dev/permissive-2-0/](https://cdla.dev/permissive-2-0/)); **verification: verified**. Permissive data license, commercial use allowed.
 * **Priority**: **High** — best real triage labels available; permissive license likely.
 
 ### 1.2 AIT-ADS — multi-step alerts for investigation (I)
@@ -148,7 +148,7 @@ Honest status: existence `[VERIFIED]` via official links below; **volumes, forma
 
 | Dataset                 | Function                    | Priority        | License caution                                                             |
 | ----------------------- | --------------------------- | --------------- | --------------------------------------------------------------------------- |
-| Microsoft GUIDE         | triage (real labels)        | **High**        | permissive likely — verify                                                 |
+| Microsoft GUIDE         | triage (real labels)        | **High**        | **CDLA-Permissive-2.0**(verified)                                           |
 | AIT-ADS + AIT-LDSv2     | investigation + context     | **High**        | AIT-ADS =**CC BY 4.0**(verified); AIT-LDSv2 logs =**CC BY-NC-SA**(verified) |
 | LANL                    | correlation + scale         | **Medium-High** | public release — verify                                                    |
 | OTRF Security-Datasets  | ATT&CK-mapped investigation | **Medium-High** | **license unclear (issue #71)**                                             |
