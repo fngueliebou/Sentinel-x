@@ -16,14 +16,23 @@ never executed or interpreted as instructions (conception v0.2, §8).
 from __future__ import annotations
 
 import json
+from collections import Counter
 from collections.abc import Iterator
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from sentinelx.datasets.ait_ads_labels import AttackWindow, attack_at
 from sentinelx.schemas.alert import RawAlert
 
-__all__ = ["wazuh_record_to_raw_alert", "iter_wazuh_alerts"]
+__all__ = [
+    "wazuh_record_to_raw_alert",
+    "iter_wazuh_alerts",
+    "iter_labeled_wazuh_alerts",
+    "ScanSummary",
+    "summarize_labeled_wazuh",
+]
 
 _SOURCE = "wazuh"
 
@@ -97,3 +106,71 @@ def iter_wazuh_alerts(path: Path | str) -> Iterator[RawAlert]:
                 continue
             record = json.loads(stripped)
             yield wazuh_record_to_raw_alert(record)
+
+
+def iter_labeled_wazuh_alerts(
+    path: Path | str, windows: list[AttackWindow]
+) -> Iterator[tuple[RawAlert, str | None]]:
+    """Yield ``(alert, attack_label)`` for each Wazuh alert in ``path``.
+
+    ``attack_label`` is the attack name whose window contains the alert's
+    timestamp, or ``None`` when the alert is benign (outside every window).
+    """
+    for alert in iter_wazuh_alerts(path):
+        yield alert, attack_at(windows, alert.timestamp)
+
+
+@dataclass
+class ScanSummary:
+    """Descriptive counts from a labeled scan of one Wazuh file.
+
+    These are DATASET statistics (how the data is composed), not detection
+    performance — there is no model here, nothing is being predicted.
+    """
+
+    total: int
+    benign: int
+    per_attack: dict[str, int]
+    first_timestamp: datetime | None
+    last_timestamp: datetime | None
+
+    @property
+    def attack_total(self) -> int:
+        return self.total - self.benign
+
+
+def summarize_labeled_wazuh(
+    path: Path | str, windows: list[AttackWindow], *, limit: int | None = None
+) -> ScanSummary:
+    """Stream a Wazuh file, label each alert, and return descriptive counts.
+
+    ``limit`` stops after N alerts (quick look); ``None`` scans the whole file.
+    Streaming keeps memory flat regardless of file size.
+    """
+    total = 0
+    benign = 0
+    per_attack: Counter[str] = Counter()
+    first_ts: datetime | None = None
+    last_ts: datetime | None = None
+
+    for alert, label in iter_labeled_wazuh_alerts(path, windows):
+        total += 1
+        moment = alert.timestamp
+        if first_ts is None or moment < first_ts:
+            first_ts = moment
+        if last_ts is None or moment > last_ts:
+            last_ts = moment
+        if label is None:
+            benign += 1
+        else:
+            per_attack[label] += 1
+        if limit is not None and total >= limit:
+            break
+
+    return ScanSummary(
+        total=total,
+        benign=benign,
+        per_attack=dict(per_attack),
+        first_timestamp=first_ts,
+        last_timestamp=last_ts,
+    )
