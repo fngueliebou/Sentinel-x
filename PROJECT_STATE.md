@@ -30,7 +30,9 @@ Canonical status file (project instructions §7). Updated at each significant st
 * **AIT-ADS Wazuh loader** (`datasets/ait_ads.py`): streams the JSON-Lines alert files (hundreds of MB) into `RawAlert`s with flat memory; verified on the real 469 MB `fox_wazuh.json`.
 * **AIT-ADS ground truth** (`datasets/ait_ads_labels.py`): attack time-windows from `labels.csv`, half-open `[start, end)`, UTC-normalized; pure `attack_at()` labeler.
 * **Labeled scan + descriptive summary** (`summarize_labeled_wazuh`) + CLI `scripts/sample_ait_ads.py` — benign/attack composition per testbed (dataset statistics, explicitly **not** detection performance).
-* **73/73 tests pass** (`pytest`), validated on Windows.
+* **Ground-truth verified**: our labels are a reconstructed `time_label` (timestamp ∈ attack window from `labels.csv`); the official per-event `event_label` is NOT in the Zenodo record (only `ait_ads.zip` + `labels.csv`) and is not used. Obtaining it would require the AIT-ADS pipeline + AIT-LDSv2/AIT-NDS.
+* **Rule-composition diagnostic** (`datasets/ait_ads_diagnostics.py` + CLI `scripts/diagnose_ait_ads_rules.py`): per-rule attack/benign breakdown, ambiguous rules, trivially-separating rules, temporal-label leakage count, missing-field and embedded-label checks. Tooling added; not yet run on real data.
+* **78/78 tests pass** (`pytest`), validated on Windows.
 
 ## In progress / next candidates
 
@@ -56,4 +58,4 @@ D1 contribution framing · D2 agent orchestration · D3 vector engine · D4 LLM 
 
 ## Next immediate task (proposed, not started)
 
-AIT-ADS Wazuh loader + ground-truth labeling + descriptive scan done (B-4a/b/c). Next candidates (pick one): (1) run the descriptive scan on the real testbeds to characterize benign/attack composition (dataset stats, no model); (2) feed real AIT-ADS alerts through the existing deterministic triage/investigation pipeline on a held-out split (per `docs/EVALUATION.md`); (3) add AMiner loader support. AMiner is messier (no stable id, epoch timestamps, no severity).
+Rule-composition diagnostic tooling done (option A). Next: (1) run `diagnose_ait_ads_rules.py` on real testbeds (start `fox`), (2) record the label-quality limitations in `data/manifests/ait-ads.json` (known\_limitations) and `docs/EVALUATION.md` using the measured findings, (3) then design an investigation scenario from a real fox attack chain (option B). No ML model is to be built until label quality / leakage is characterized.
