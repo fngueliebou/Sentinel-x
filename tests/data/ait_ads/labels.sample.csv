@@ -1,0 +1,7 @@
+scenario,attack,start,end
+russellmitchell,network_scans,1642993260.0,1642996606.0
+russellmitchell,service_scans,1642996606.0,1642996645.0
+fox,network_scans,1642507140.0,1642508220.0
+fox,service_scans,1642508220.0,1642508267.0
+fox,wpscan,1642508267.0,1642508310.0
+fox,dirb,1642508310.0,1642509480.0
