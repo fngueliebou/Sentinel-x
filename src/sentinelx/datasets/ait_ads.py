@@ -30,6 +30,7 @@ __all__ = [
     "wazuh_record_to_raw_alert",
     "iter_wazuh_alerts",
     "iter_labeled_wazuh_alerts",
+    "iter_alerts_for_attacks",
     "ScanSummary",
     "summarize_labeled_wazuh",
 ]
@@ -118,6 +119,25 @@ def iter_labeled_wazuh_alerts(
     """
     for alert in iter_wazuh_alerts(path):
         yield alert, attack_at(windows, alert.timestamp)
+
+
+def iter_alerts_for_attacks(
+    path: Path | str,
+    windows: list[AttackWindow],
+    attacks: set[str] | None = None,
+) -> Iterator[tuple[RawAlert, str]]:
+    """Yield ``(alert, attack_name)`` only for alerts labeled as an attack.
+
+    Benign alerts are skipped. If ``attacks`` is given, only those attack names
+    are kept (e.g. ``{"privilege_escalation", "dnsteal"}``); ``None`` keeps all
+    attack-labeled alerts. Streaming, so a 600 MB file is scanned with flat memory.
+    """
+    for alert, label in iter_labeled_wazuh_alerts(path, windows):
+        if label is None:
+            continue
+        if attacks is not None and label not in attacks:
+            continue
+        yield alert, label
 
 
 @dataclass
