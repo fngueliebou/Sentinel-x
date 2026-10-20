@@ -16,10 +16,16 @@
   "access_conditions": "Public download from Zenodo; no account required.",
   "usage_conditions": "Attribution required (CC BY 4.0).",
   "redistribution_conditions": "Keep raw data under the git-ignored data/external/ (never committed). Redistribution permitted with attribution.",
-  "ground_truth": "Event-level attack labels over a multi-step scenario (labels.csv).",
+  "ground_truth": "Attack time-windows per testbed (labels.csv: scenario,attack,start,end). This yields a reconstructed TIME_LABEL (an alert is 'attack' iff its timestamp falls in an attack phase), NOT a per-event causal label. The official per-event event_label is produced only by the AIT-ADS pipeline against AIT-LDSv2/AIT-NDS and is not included in this Zenodo record.",
   "known_limitations": [
     "Synthetic lab testbeds, not production SOC traffic.",
-    "Alert volume and class balance depend on the detectors' configuration."
+    "Alert volume and class balance depend on the detectors' configuration.",
+    "Ground truth is a TIME_LABEL (temporal co-occurrence), not causal: every alert during an attack window is labeled 'attack', including unrelated background noise.",
+    "event_label (per-event causal label) is NOT distributed in this record (only ait_ads.zip + labels.csv); obtaining it requires the AIT-ADS pipeline with AIT-LDSv2 + AIT-NDS.",
+    "Measured on fox/Wazuh (462,523 alerts; descriptive dataset statistics, NOT detection performance; diagnostic commit 931f3a0): 89.13% labeled attack, dominated by the 'dirb' web scan (98.51% of the attack class).",
+    "Near-trivial separability / leakage risk: a single generic rule (id 31101, 'Web server 400 error code') covers ~92% of attack alerts, and 8 rules cover 99.6% -> alert-level 'attack' is almost fully determined by rule identity.",
+    "High-value attack stages are rare on fox (privilege_escalation=10, dnsteal=381, cracking=554 alerts): the positive class is dominated by volumetric web-scan noise, not SOC-relevant intrusions.",
+    "~1.6k attack-labeled alerts fall on background rules (Dovecot auth success, IDS events, TLS) purely by time co-occurrence: clear temporal mislabels concentrated in auth/IDS signals."
   ],
   "local_path": "data/external/ait-ads",
   "local_checksum": "sha256:7b272377b837462a852c6e52f773810472ed8d428646bdabf437ae4457ed3928",

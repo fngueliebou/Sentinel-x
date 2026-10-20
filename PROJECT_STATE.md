@@ -31,7 +31,8 @@ Canonical status file (project instructions §7). Updated at each significant st
 * **AIT-ADS ground truth** (`datasets/ait_ads_labels.py`): attack time-windows from `labels.csv`, half-open `[start, end)`, UTC-normalized; pure `attack_at()` labeler.
 * **Labeled scan + descriptive summary** (`summarize_labeled_wazuh`) + CLI `scripts/sample_ait_ads.py` — benign/attack composition per testbed (dataset statistics, explicitly **not** detection performance).
 * **Ground-truth verified**: our labels are a reconstructed `time_label` (timestamp ∈ attack window from `labels.csv`); the official per-event `event_label` is NOT in the Zenodo record (only `ait_ads.zip` + `labels.csv`) and is not used. Obtaining it would require the AIT-ADS pipeline + AIT-LDSv2/AIT-NDS.
-* **Rule-composition diagnostic** (`datasets/ait_ads_diagnostics.py` + CLI `scripts/diagnose_ait_ads_rules.py`): per-rule attack/benign breakdown, ambiguous rules, trivially-separating rules, temporal-label leakage count, missing-field and embedded-label checks. Tooling added; not yet run on real data.
+* **Rule-composition diagnostic** (`datasets/ait_ads_diagnostics.py` + CLI `scripts/diagnose_ait_ads_rules.py`): per-rule attack/benign breakdown, ambiguous rules, trivially-separating rules, temporal-label leakage count, missing-field and embedded-label checks.
+* **Diagnostic run on fox/Wazuh** (462,523 alerts): attack class dominated by `dirb` web scan (98.5%); rule 31101 alone ≈92% of positives, 8 rules ≈99.6% (near-trivial separability / leakage). High-value stages rare (priv-esc=10). Findings documented in `data/manifests/ait-ads.json` (known\_limitations) and `docs/EVALUATION.md` §5.1. **Dataset statistics, not detection performance.**
 * **78/78 tests pass** (`pytest`), validated on Windows.
 
 ## In progress / next candidates
@@ -58,4 +59,4 @@ D1 contribution framing · D2 agent orchestration · D3 vector engine · D4 LLM 
 
 ## Next immediate task (proposed, not started)
 
-Rule-composition diagnostic tooling done (option A). Next: (1) run `diagnose_ait_ads_rules.py` on real testbeds (start `fox`), (2) record the label-quality limitations in `data/manifests/ait-ads.json` (known\_limitations) and `docs/EVALUATION.md` using the measured findings, (3) then design an investigation scenario from a real fox attack chain (option B). No ML model is to be built until label quality / leakage is characterized.
+Option A done: diagnostic run on fox, label-quality limitations documented (manifest + EVALUATION §5.1). Next (option B): design an investigation scenario from a real fox attack chain (e.g. webshell -> cracking -> privilege\_escalation -> dnsteal), evaluated at incident level, NOT alert-level binary triage on the noisy time\_label. Optional micro-task: refine the leakage metric to a ratio band (5-95%) so it stops over-counting near-pure rules like 31101.
