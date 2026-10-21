@@ -33,7 +33,9 @@ Canonical status file (project instructions §7). Updated at each significant st
 * **Ground-truth verified**: our labels are a reconstructed `time_label` (timestamp ∈ attack window from `labels.csv`); the official per-event `event_label` is NOT in the Zenodo record (only `ait_ads.zip` + `labels.csv`) and is not used. Obtaining it would require the AIT-ADS pipeline + AIT-LDSv2/AIT-NDS.
 * **Rule-composition diagnostic** (`datasets/ait_ads_diagnostics.py` + CLI `scripts/diagnose_ait_ads_rules.py`): per-rule attack/benign breakdown, ambiguous rules, trivially-separating rules, temporal-label leakage count, missing-field and embedded-label checks.
 * **Diagnostic run on fox/Wazuh** (462,523 alerts): attack class dominated by `dirb` web scan (98.5%); rule 31101 alone ≈92% of positives, 8 rules ≈99.6% (near-trivial separability / leakage). High-value stages rare (priv-esc=10). Findings documented in `data/manifests/ait-ads.json` (known\_limitations) and `docs/EVALUATION.md` §5.1. **Dataset statistics, not detection performance.**
-* **78/78 tests pass** (`pytest`), validated on Windows.
+* **Attack-phase extractor** (`iter_alerts_for_attacks` + `scripts/extract_ait_ads_attack.py`): pulls the real alerts of a given attack phase for inspection.
+* **First reference investigation scenario**`data/scenarios/scenario_fox_privesc_shadow.json`: 10 REAL fox/Wazuh events (www-data → su phopkins → sudo root → `cat /etc/shadow`), `expected_disposition=escalate`, `expected_techniques=[T1548.003, T1003.008]` (observed execution only; T1078/T1505.003 documented as not-demonstrated in metadata). Label provenance = `time_label` (not causal) explicitly recorded. All events upfront → tests chain reconstruction, NOT tool retrieval (noted for a future scenario). **Not a benchmark.**
+* **88/88 tests pass** (`pytest`), validated on Windows.
 
 ## In progress / next candidates
 

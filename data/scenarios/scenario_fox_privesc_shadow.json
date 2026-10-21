@@ -1,0 +1,60 @@
+{
+  "scenario_id": "fox-privesc-shadow",
+  "description": "AIT-ADS fox (Wazuh) : sur l'hôte intranet-server, le compte de service web www-data ouvre une session interactive en tant que phopkins (su) puis exécute plusieurs sudo en root, dont /bin/cat /etc/shadow. Premier cas de référence d'investigation fondé sur des alertes réelles ; qualité d'annotation (time_label) explicitement documentée.",
+  "alert": {
+    "id": "1686444911.263244326",
+    "source": "wazuh",
+    "timestamp": "2022-01-18T13:14:31Z",
+    "title": "User successfully changed UID.",
+    "severity": "3",
+    "description": "Jan 18 13:14:31 intranet-server su[28816]: + /dev/pts/1 www-data:phopkins",
+    "entities": ["host:intranet-server", "ip:10.35.35.206", "user:www-data", "user:phopkins"],
+    "events": [
+      {"id": "e1", "timestamp": "2022-01-18T13:14:31Z", "source": "wazuh", "entity": "host:intranet-server", "action": "User successfully changed UID.", "message": "Jan 18 13:14:31 intranet-server su[28816]: + /dev/pts/1 www-data:phopkins", "attributes": {"original_wazuh_id": "1686444911.263244326", "rule_id": "5304", "rule_level": "3", "rule_groups": "syslog,su,authentication_success", "src_ip": "10.35.35.206"}},
+      {"id": "e2", "timestamp": "2022-01-18T13:14:31Z", "source": "wazuh", "entity": "host:intranet-server", "action": "PAM: Login session opened.", "message": "Jan 18 13:14:31 intranet-server su[28816]: pam_unix(su:session): session opened for user phopkins by (uid=33)", "attributes": {"original_wazuh_id": "1686444911.263244776", "rule_id": "5501", "rule_level": "3", "rule_groups": "pam,syslog,authentication_success", "src_ip": "10.35.35.206"}},
+      {"id": "e3", "timestamp": "2022-01-18T13:14:31Z", "source": "wazuh", "entity": "host:intranet-server", "action": "PAM: Login session opened.", "message": "Jan 18 13:14:31 intranet-server systemd: pam_unix(systemd-user:session): session opened for user phopkins by (uid=0)", "attributes": {"original_wazuh_id": "1686444911.263245247", "rule_id": "5501", "rule_level": "3", "rule_groups": "pam,syslog,authentication_success", "src_ip": "10.35.35.206"}},
+      {"id": "e4", "timestamp": "2022-01-18T13:14:41Z", "source": "wazuh", "entity": "host:intranet-server", "action": "Successful sudo to ROOT executed.", "message": "Jan 18 13:14:41 intranet-server sudo: phopkins : TTY=pts/1 ; PWD=/var/www/intranet.price.fox.org/wp-content/uploads/2022/01 ; USER=root ; COMMAND=list", "attributes": {"original_wazuh_id": "1686444921.263245724", "rule_id": "5402", "rule_level": "3", "rule_groups": "syslog,sudo", "src_ip": "10.35.35.206"}},
+      {"id": "e5", "timestamp": "2022-01-18T13:14:43Z", "source": "wazuh", "entity": "host:intranet-server", "action": "PAM: Login session opened.", "message": "Jan 18 13:14:43 intranet-server sudo: pam_unix(sudo:session): session opened for user root by (uid=0)", "attributes": {"original_wazuh_id": "1686444923.263246988", "rule_id": "5501", "rule_level": "3", "rule_groups": "pam,syslog,authentication_success", "src_ip": "10.35.35.206"}},
+      {"id": "e6", "timestamp": "2022-01-18T13:14:43Z", "source": "wazuh", "entity": "host:intranet-server", "action": "PAM: Login session closed.", "message": "Jan 18 13:14:43 intranet-server sudo: pam_unix(sudo:session): session closed for user root", "attributes": {"original_wazuh_id": "1686444923.263247446", "rule_id": "5502", "rule_level": "3", "rule_groups": "pam,syslog", "src_ip": "10.35.35.206"}},
+      {"id": "e7", "timestamp": "2022-01-18T13:14:43Z", "source": "wazuh", "entity": "host:intranet-server", "action": "Successful sudo to ROOT executed.", "message": "Jan 18 13:14:43 intranet-server sudo: phopkins : TTY=pts/1 ; PWD=/var/www/intranet.price.fox.org/wp-content/uploads/2022/01 ; USER=root ; COMMAND=/bin/ls -laR /root/", "attributes": {"original_wazuh_id": "1686444923.263246341", "rule_id": "5402", "rule_level": "3", "rule_groups": "syslog,sudo", "src_ip": "10.35.35.206"}},
+      {"id": "e8", "timestamp": "2022-01-18T13:14:49Z", "source": "wazuh", "entity": "host:intranet-server", "action": "Successful sudo to ROOT executed.", "message": "Jan 18 13:14:49 intranet-server sudo: phopkins : TTY=pts/1 ; PWD=/var/www/intranet.price.fox.org/wp-content/uploads/2022/01 ; USER=root ; COMMAND=/bin/cat /etc/shadow", "attributes": {"original_wazuh_id": "1686444929.263247863", "rule_id": "5402", "rule_level": "3", "rule_groups": "syslog,sudo", "src_ip": "10.35.35.206"}},
+      {"id": "e9", "timestamp": "2022-01-18T13:14:49Z", "source": "wazuh", "entity": "host:intranet-server", "action": "PAM: Login session opened.", "message": "Jan 18 13:14:49 intranet-server sudo: pam_unix(sudo:session): session opened for user root by (uid=0)", "attributes": {"original_wazuh_id": "1686444929.263248512", "rule_id": "5501", "rule_level": "3", "rule_groups": "pam,syslog,authentication_success", "src_ip": "10.35.35.206"}},
+      {"id": "e10", "timestamp": "2022-01-18T13:14:49Z", "source": "wazuh", "entity": "host:intranet-server", "action": "PAM: Login session closed.", "message": "Jan 18 13:14:49 intranet-server sudo: pam_unix(sudo:session): session closed for user root", "attributes": {"original_wazuh_id": "1686444929.263248970", "rule_id": "5502", "rule_level": "3", "rule_groups": "pam,syslog", "src_ip": "10.35.35.206"}}
+    ],
+    "raw": {
+      "original_wazuh_id": "1686444911.263244326",
+      "rule_id": "5304",
+      "rule_level": "3",
+      "source_file": "data/external/ait-ads/fox_wazuh.json",
+      "note": "Provenance only; the full original Wazuh record is not reproduced here to avoid inventing fields that were not captured during extraction."
+    }
+  },
+  "expected_disposition": "escalate",
+  "reference_conclusion": "Les événements Wazuh associés à intranet-server montrent une transition su de www-data vers phopkins, suivie d'exécutions sudo réussies en tant que root, notamment la commande /bin/cat /etc/shadow. Cette séquence est compatible avec une élévation de privilèges et une tentative d'accès au matériel d'authentification. Le contexte du dataset classe cette séquence dans le scénario privilege_escalation, sous réserve de vérifier la provenance exacte de ce label (ici : time_label temporel, non causal). Les événements fournis ne permettent pas d'établir le vecteur d'accès initial, de confirmer l'existence d'un Web Shell ni de démontrer une exfiltration du contenu de /etc/shadow.",
+  "acceptable_conclusions": [],
+  "expected_techniques": ["T1548.003", "T1003.008"],
+  "key_evidence_event_ids": ["e1", "e4", "e7", "e8"],
+  "expected_unknowns": [
+    "Le vecteur d'accès initial (comment le compte www-data a été compromis) n'est pas présent dans les preuves fournies.",
+    "Le mécanisme exact de compromission (web shell, vulnérabilité applicative, identifiants volés) n'est pas démontré.",
+    "Aucune exfiltration du contenu de /etc/shadow n'est démontrée : l'exécution de la commande cat est observée, son résultat et tout transfert hors de l'hôte ne le sont pas.",
+    "Le statut de l'utilisateur phopkins (compte légitime détourné ou compte contrôlé par l'attaquant) n'est pas établi."
+  ],
+  "allowed_actions": ["get_authentication_events", "get_sudo_events", "get_host_timeline", "lookup_user_account"],
+  "forbidden_actions": ["disable_account", "block_ip", "isolate_host", "kill_session", "delete_file", "reset_password"],
+  "tags": ["ait-ads", "fox", "privilege-escalation", "real-data", "investigation"],
+  "metadata": {
+    "origin": "ait-ads",
+    "author": "sentinelx",
+    "source_dataset": "AIT Alert Data Set (Zenodo 8263181), fox testbed, Wazuh source",
+    "source_file": "data/external/ait-ads/fox_wazuh.json",
+    "extracted_via": "scripts/extract_ait_ads_attack.py --scenario fox --attack privilege_escalation",
+    "label_provenance": "time_label: alerts are labeled 'privilege_escalation' only because their timestamp falls in the attack window of labels.csv. The per-event event_label is NOT distributed in this Zenodo record. See data/manifests/ait-ads.json.",
+    "label_confidence": "Higher than a volumetric window: all 10 events are coherent su/sudo activity (www-data -> phopkins -> root on intranet-server within 18s), consistent with the labeled phase, unlike e.g. the dnsteal window which sweeps in benign mail logins. Causal certainty is NOT formally established.",
+    "attack_observed": "T1548.003 (Sudo and Sudo Caching): sudo-to-root execution observed. T1003.008 (/etc/passwd and /etc/shadow): 'cat /etc/shadow' command execution observed.",
+    "attack_not_demonstrated": "T1505.003 (Web Shell): plausible initial vector, absent from the supplied evidence. T1078 (Valid Accounts): abuse of phopkins not established by any annotation.",
+    "schema_limitation": "Scenario.expected_techniques is a flat list without observed/inferred/not-demonstrated semantics; that distinction is documented here in metadata rather than added as new contract fields.",
+    "scope_limitation": "All 10 events are provided upfront in alert.events, so this scenario tests chain reconstruction and interpretation, NOT tool-based retrieval. A future scenario should expose only the trigger (e1) and require read-only tools to recover the rest.",
+    "not_a_benchmark": "First reference case grounded in AIT data; not a scientific benchmark nor a validation of SENTINEL-X."
+  }
+}
