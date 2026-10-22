@@ -30,7 +30,7 @@ from sentinelx.triage import triage
 
 from evals.baselines import BASELINES
 
-_KNOWLEDGE_VERSION = "sample-2026-10-17"
+_KNOWLEDGE_VERSION = "sample-2026-10-22"
 _SCENARIOS = Path("evals/scenarios/sample_scenarios.json")
 _RESULTS_DIR = Path("evals/results")
 
