@@ -16,10 +16,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sentinelx.config import Settings
 from sentinelx.pipeline import run_investigation
 from sentinelx.schemas import Disposition, Scenario, SourceType
 
 _SCENARIO = Path("data/scenarios/scenario_fox_privesc_shadow.json")
+# Pin the deterministic provider explicitly so these tests never depend on the
+# ambient environment / a local .env (reproducibility, conception v0.2 §10).
+# Explicit Settings kwargs take precedence over env and .env in pydantic-settings.
+_DETERMINISTIC = Settings(llm_provider="deterministic")
 
 
 def _scenario() -> Scenario:
@@ -28,8 +33,8 @@ def _scenario() -> Scenario:
 
 def _run():
     sc = _scenario()
-    # Baseline B: deterministic provider, NO retrieval (no API, no network).
-    report = run_investigation(sc.alert, use_rag=False)
+    # Baseline B: deterministic provider (pinned), NO retrieval (no API, no network).
+    report = run_investigation(sc.alert, use_rag=False, settings=_DETERMINISTIC)
     return sc, report
 
 
@@ -86,8 +91,8 @@ def test_expected_gaps_are_observed():
 
 def _run_c():
     sc = _scenario()
-    # Baseline C: deterministic provider WITH RAG over the sample store (still no API).
-    report = run_investigation(sc.alert, use_rag=True)
+    # Baseline C: deterministic provider (pinned) WITH RAG over the sample store (no API).
+    report = run_investigation(sc.alert, use_rag=True, settings=_DETERMINISTIC)
     return sc, report
 
 
@@ -114,8 +119,8 @@ def test_baseline_c_hypotheses_cite_retrieved_knowledge():
 
 def test_rag_does_not_change_deterministic_disposition():
     sc = _scenario()
-    report_b = run_investigation(sc.alert, use_rag=False)
-    report_c = run_investigation(sc.alert, use_rag=True)
+    report_b = run_investigation(sc.alert, use_rag=False, settings=_DETERMINISTIC)
+    report_c = run_investigation(sc.alert, use_rag=True, settings=_DETERMINISTIC)
     # The deterministic provider derives its disposition from structured signals only,
     # never from retrieved knowledge -> RAG leaves the triage decision unchanged here.
     assert report_c.disposition == report_b.disposition
