@@ -1,7 +1,7 @@
 {
   "source": "SENTINEL-X sample knowledge",
   "note": "Original summaries written for SENTINEL-X. Technique identifiers reference the MITRE ATT&CK framework (attribution: MITRE ATT&CK, https://attack.mitre.org). No ATT&CK prose is copied; these are paraphrased, redistributable stubs for the first slice only.",
-  "version": "sample-2026-10-17",
+  "version": "sample-2026-10-22",
   "documents": [
     {
       "id": "KB-T1110",
@@ -38,6 +38,24 @@
       "source_version": "sample-2026-10-17",
       "title": "Known benign: vulnerability scanners",
       "text": "Scheduled internal vulnerability scanners can generate authentication failures and connection bursts that resemble attacks. Before escalating, check whether the source address belongs to an approved scanner inventory; if so the activity is typically a benign positive."
+    },
+    {
+      "id": "KB-T1548-003",
+      "source": "MITRE ATT&CK",
+      "source_ref": "T1548.003",
+      "source_url": "https://attack.mitre.org/techniques/T1548/003/",
+      "source_version": "sample-2026-10-22",
+      "title": "Abuse Elevation Control Mechanism: Sudo and Sudo Caching (T1548.003)",
+      "text": "On Linux, sudo lets an authorized user obtain the privileges of another user, usually root. Adversaries abuse sudo (or its timestamp/credential caching and over-permissive sudoers policy) to elevate to root. A successful sudo-to-root, especially by a service account or an account that does not normally use sudo, is a common privilege-escalation signal."
+    },
+    {
+      "id": "KB-T1003-008",
+      "source": "MITRE ATT&CK",
+      "source_ref": "T1003.008",
+      "source_url": "https://attack.mitre.org/techniques/T1003/008/",
+      "source_version": "sample-2026-10-22",
+      "title": "OS Credential Dumping: /etc/passwd and /etc/shadow (T1003.008)",
+      "text": "On Linux, local account password hashes are stored in /etc/shadow, which only root can read (/etc/passwd is world-readable). An actor with root, for example after escalating privileges via sudo from a service or user account, can read or copy these files. This is a credential-access step and a prerequisite for offline password cracking. A root-level read of /etc/shadow shows access to the credential material; on its own it does not prove that the hashes were copied off the host or that any password was recovered, which are separate steps."
     }
   ]
 }
