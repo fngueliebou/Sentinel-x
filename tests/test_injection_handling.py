@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from sentinelx.security import detect_injection_patterns
 from sentinelx.pipeline import run_investigation_from_file
-from sentinelx.schemas import Disposition
+from sentinelx.schemas import Disposition, SourceType
 
 
 def test_injection_patterns_detected():
@@ -45,4 +45,11 @@ def test_no_injection_flag_on_clean_alert(settings):
     report = run_investigation_from_file(
         "data/alerts/sample_alert_bruteforce.json", settings=settings
     )
-    assert all(not e.untrusted_flags for e in report.evidence)
+    # A clean alert must not flag its own telemetry (EVENT evidence). Retrieved
+    # KNOWLEDGE is a separate concern: curated security knowledge can legitimately
+    # contain terms (e.g. "exfiltrate", "run command") that trip the injection
+    # heuristic, and the detector is deliberately still applied to it for
+    # RAG-poisoning visibility. So this property is asserted on EVENT evidence only.
+    event_evidence = [e for e in report.evidence if e.source_type is SourceType.EVENT]
+    assert event_evidence  # sanity: the clean alert does carry telemetry
+    assert all(not e.untrusted_flags for e in event_evidence)
