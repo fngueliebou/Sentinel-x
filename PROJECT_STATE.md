@@ -2,7 +2,7 @@
 
 Canonical status file (project instructions §7). Updated at each significant step.
 
-* **Date** : 2026-10-20
+* **Date** : 2026-10-22
 * **Phase** : construction — first vertical slice delivered.
 * **Maturity (conception §4)** : N0 (socle) done; N1–N2 partially present via the deterministic provider; **not yet validated on public datasets**.
 
@@ -35,7 +35,8 @@ Canonical status file (project instructions §7). Updated at each significant st
 * **Diagnostic run on fox/Wazuh** (462,523 alerts): attack class dominated by `dirb` web scan (98.5%); rule 31101 alone ≈92% of positives, 8 rules ≈99.6% (near-trivial separability / leakage). High-value stages rare (priv-esc=10). Findings documented in `data/manifests/ait-ads.json` (known\_limitations) and `docs/EVALUATION.md` §5.1. **Dataset statistics, not detection performance.**
 * **Attack-phase extractor** (`iter_alerts_for_attacks` + `scripts/extract_ait_ads_attack.py`): pulls the real alerts of a given attack phase for inspection.
 * **First reference investigation scenario**`data/scenarios/scenario_fox_privesc_shadow.json`: 10 REAL fox/Wazuh events (www-data → su phopkins → sudo root → `cat /etc/shadow`), `expected_disposition=escalate`, `expected_techniques=[T1548.003, T1003.008]` (observed execution only; T1078/T1505.003 documented as not-demonstrated in metadata). Label provenance = `time_label` (not causal) explicitly recorded. All events upfront → tests chain reconstruction, NOT tool retrieval (noted for a future scenario). **Not a benchmark.**
-* **88/88 tests pass** (`pytest`), validated on Windows.
+* **Baseline B/C scenario runner** (`scripts/run_scenario.py`, `--rag` for C) + tests: runs a Scenario end-to-end through the deterministic pipeline, no API. Observed on `fox-privesc-shadow` (descriptive, NOT performance): both B and C give `insufficient_evidence` (≠ reference `escalate`), 10 grounded/supported facts, citation verification passes. RAG (C) retrieves only the sample KB's brute-force/valid-accounts/scanner docs at very low scores (<0.05); it adds 4 off-topic hypotheses + 1 misleading scanner recommendation. Disposition is KB-insensitive for the stub (C−B = 0). **Not a performance measurement.**
+* **96/96 tests pass** (`pytest`), validated on Windows.
 
 ## In progress / next candidates
 
@@ -53,6 +54,7 @@ Canonical status file (project instructions §7). Updated at each significant st
 
 * Default "analyst" is a rule-based stub; no real-LLM quality/robustness measured.
 * Retrieval is lexical token-overlap (not BM25/vectors).
+* Sample KB (`data/knowledge/mitre_sample.json`) has no document for privilege escalation (T1548.003) or /etc/shadow credential access (T1003.008) → RAG coverage gap on the fox-privesc case (observed; not a general RAG verdict).
 * Sample scenarios are a smoke test, not a benchmark.
 
 ## Open decisions (see docs)
@@ -61,4 +63,4 @@ D1 contribution framing · D2 agent orchestration · D3 vector engine · D4 LLM 
 
 ## Next immediate task (proposed, not started)
 
-Option A done: diagnostic run on fox, label-quality limitations documented (manifest + EVALUATION §5.1). Next (option B): design an investigation scenario from a real fox attack chain (e.g. webshell -> cracking -> privilege\_escalation -> dnsteal), evaluated at incident level, NOT alert-level binary triage on the noisy time\_label. Optional micro-task: refine the leakage metric to a ratio band (5-95%) so it stops over-counting near-pure rules like 31101.
+First reference scenario built and run end-to-end on Baselines B and C (deterministic, no API). Open decision for the next increment (to choose): (1) enrich the sample KB with T1548.003 / T1003.008 stubs — improves retrieval relevance/hypotheses only, NOT the stub's disposition (KB-insensitive); or (2) wire the real Anthropic provider (Baseline B-real) — the actual capability jump (needs API key, cost, fixed temperature/seed per EVALUATION §7.c). Deferred: Scenario→evals harness integration (needs the §7.b investigation rubric, not yet implemented); a trigger-only + read-only-tools scenario variant (N3).
