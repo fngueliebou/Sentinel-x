@@ -82,3 +82,40 @@ def test_expected_gaps_are_observed():
     # Absence in the report is a STUB limitation, NOT an absence from the data.
     assert sc.expected_unknowns
     assert report.unknowns == []
+
+
+def _run_c():
+    sc = _scenario()
+    # Baseline C: deterministic provider WITH RAG over the sample store (still no API).
+    report = run_investigation(sc.alert, use_rag=True)
+    return sc, report
+
+
+def test_baseline_c_runs_and_retrieves_knowledge():
+    _sc, report = _run_c()
+    assert report.llm_provider == "deterministic"
+    assert report.verification_passed is True
+    kb = [e for e in report.evidence if e.source_type is SourceType.KNOWLEDGE]
+    events = [e for e in report.evidence if e.source_type is SourceType.EVENT]
+    # RAG retrieved knowledge (exact count depends on the KB; assert presence, not a number).
+    assert len(kb) >= 1
+    assert len(events) == 10  # the telemetry events are still all present
+
+
+def test_baseline_c_hypotheses_cite_retrieved_knowledge():
+    _sc, report = _run_c()
+    evidence_ids = report.evidence_ids()
+    assert report.hypotheses  # RAG produced at least one hypothesis
+    for h in report.hypotheses:
+        assert h.citations
+        assert all(c.evidence_id in evidence_ids for c in h.citations)
+        assert h.supported is True
+
+
+def test_rag_does_not_change_deterministic_disposition():
+    sc = _scenario()
+    report_b = run_investigation(sc.alert, use_rag=False)
+    report_c = run_investigation(sc.alert, use_rag=True)
+    # The deterministic provider derives its disposition from structured signals only,
+    # never from retrieved knowledge -> RAG leaves the triage decision unchanged here.
+    assert report_c.disposition == report_b.disposition

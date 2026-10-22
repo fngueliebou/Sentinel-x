@@ -1,17 +1,22 @@
 #!/usr/bin/env python
-"""Run one investigation Scenario through the deterministic pipeline (Baseline B).
+"""Run one investigation Scenario through the deterministic pipeline.
+
+Baseline B (default)   : deterministic provider, NO retrieval.
+Baseline C (--rag)     : deterministic provider + RAG over the sample knowledge store.
 
 Loads a Scenario (which also carries its ground truth), runs the EXISTING pipeline
-on scenario.alert with the deterministic provider and NO RAG, prints the structured
-report, then a DESCRIPTIVE comparison against the scenario's expectations.
+on scenario.alert, prints the structured report, then a DESCRIPTIVE comparison
+against the scenario's expectations.
 
 This is a technical validation of the pipeline and an observation of the
 deterministic provider's limits. It is NOT a performance measurement, NOT an LLM
 evaluation, and does NOT validate the AIT-ADS time_label as certain ground truth.
 It reuses only public functions; it changes nothing in src/, evals/ or the schemas.
+No API, no network (the deterministic provider and the in-memory store are offline).
 
 Usage:
     python scripts/run_scenario.py data/scenarios/scenario_fox_privesc_shadow.json
+    python scripts/run_scenario.py data/scenarios/scenario_fox_privesc_shadow.json --rag
 """
 
 from __future__ import annotations
@@ -21,7 +26,7 @@ import json
 from pathlib import Path
 
 from sentinelx.pipeline import run_investigation
-from sentinelx.schemas import InvestigationReport, Scenario
+from sentinelx.schemas import InvestigationReport, Scenario, SourceType
 
 
 def load_scenario(path: str | Path) -> Scenario:
@@ -29,9 +34,14 @@ def load_scenario(path: str | Path) -> Scenario:
     return Scenario.model_validate(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
-def run_baseline_b(scenario: Scenario) -> InvestigationReport:
-    """Baseline B: deterministic provider, NO retrieval. No API, no network."""
-    return run_investigation(scenario.alert, use_rag=False)
+def run_pipeline(scenario: Scenario, *, use_rag: bool) -> InvestigationReport:
+    """Run the existing pipeline with the deterministic provider.
+
+    use_rag=False -> Baseline B (no retrieval). use_rag=True -> Baseline C
+    (deterministic + RAG over the sample store). run_investigation loads the sample
+    store itself when use_rag is True. No API, no network either way.
+    """
+    return run_investigation(scenario.alert, use_rag=use_rag)
 
 
 def _supported_label(value: bool | None) -> str:
@@ -57,9 +67,12 @@ def _evidence_for_event(report: InvestigationReport, event_id: str):
     return None
 
 
-def print_report_and_comparison(scenario: Scenario, report: InvestigationReport) -> None:
+def print_report_and_comparison(
+    scenario: Scenario, report: InvestigationReport, *, baseline: str
+) -> None:
+    rag_label = "deterministic + RAG" if baseline == "C" else "deterministic, no RAG"
     print("=" * 72)
-    print(f"SCENARIO {scenario.scenario_id}  (Baseline B: deterministic provider, no RAG)")
+    print(f"SCENARIO {scenario.scenario_id}  (Baseline {baseline}: {rag_label})")
     print("  Technical pipeline validation only - not a performance measurement,")
     print("  not an LLM evaluation; the AIT-ADS label is a time_label (not certain truth).")
     print("=" * 72)
@@ -74,7 +87,10 @@ def print_report_and_comparison(scenario: Scenario, report: InvestigationReport)
     print(f"\nEVIDENCE SET ({len(report.evidence)} items):")
     for e in report.evidence:
         flags = f"  flags={e.untrusted_flags}" if e.untrusted_flags else ""
-        print(f"    {e.id}  [{e.source_type.value}]  ref={e.source_ref}{flags}")
+        score = f"  score={e.score}" if e.score is not None else ""
+        print(f"    {e.id}  [{e.source_type.value}]  ref={e.source_ref}{score}{flags}")
+        if e.source_type is SourceType.KNOWLEDGE:
+            print(f"        content: {e.content[:180]}")
 
     # The report keeps claim types separate: facts / hypotheses / unknowns / recommendations.
     _print_findings("FACTS", report.facts)
@@ -108,8 +124,18 @@ def print_report_and_comparison(scenario: Scenario, report: InvestigationReport)
         else:
             print(f"    - {eid} -> {ev.id}: present, but not cited by any supported fact")
 
+    # ATT&CK coverage: do the EXPECTED techniques appear in the RETRIEVED knowledge?
+    # This reports documentary coverage for THIS case only - never an RAG efficacy claim.
+    kb = [e for e in report.evidence if e.source_type is SourceType.KNOWLEDGE]
     print(f"\n  expected ATT&CK techniques (scenario): {scenario.expected_techniques}")
-    print("    The deterministic provider produces NO ATT&CK mapping (by design).")
+    if not kb:
+        print("    no knowledge retrieved (Baseline B / RAG disabled).")
+    else:
+        for tech in scenario.expected_techniques:
+            haystack = " ".join(f"{e.source_ref} {e.content}" for e in kb).lower()
+            found = tech.lower() in haystack
+            print(f"    {tech}: {'present in retrieved knowledge' if found else 'NOT present in retrieved knowledge (coverage gap for THIS case)'}")
+    print("    (The deterministic provider produces no ATT&CK mapping of its own.)")
 
     print(f"\n  scenario legitimate unknowns: {len(scenario.expected_unknowns)}  |  "
           f"report unknowns: {len(report.unknowns)}")
@@ -120,14 +146,18 @@ def print_report_and_comparison(scenario: Scenario, report: InvestigationReport)
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Run a Scenario through the deterministic pipeline (Baseline B, no RAG)."
+        description="Run a Scenario through the deterministic pipeline (Baseline B, or C with --rag)."
     )
     parser.add_argument("scenario", type=Path, help="Path to a Scenario JSON file.")
+    parser.add_argument(
+        "--rag", action="store_true",
+        help="Enable RAG over the sample knowledge store (Baseline C). Default off (Baseline B).",
+    )
     args = parser.parse_args(argv)
 
     scenario = load_scenario(args.scenario)
-    report = run_baseline_b(scenario)
-    print_report_and_comparison(scenario, report)
+    report = run_pipeline(scenario, use_rag=args.rag)
+    print_report_and_comparison(scenario, report, baseline="C" if args.rag else "B")
     return 0
 
 
