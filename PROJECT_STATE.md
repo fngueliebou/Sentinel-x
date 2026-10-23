@@ -2,8 +2,8 @@
 
 Canonical status file (project instructions §7). Updated at each significant step.
 
-* **Date** : 2026-10-22
-* **Phase** : construction — first vertical slice delivered.
+* **Date** : 2026-10-23
+* **Phase** : construction — first vertical slice delivered; first honest evaluation run produced.
 * **Maturity (conception §4)** : N0 (socle) done; N1–N2 partially present via the deterministic provider; **not yet validated on public datasets**.
 
 ## Completed (tested)
@@ -12,31 +12,31 @@ Canonical status file (project instructions §7). Updated at each significant st
 * Data contracts (Pydantic): alert, event, evidence/citation, report.
 * Ingestion → normalization → deterministic triage (A).
 * In-memory knowledge store + RAG retrieval with provenance.
-* `LLMProvider` abstraction; deterministic provider (default) + anthropic provider (optional, untested).
+* `LLMProvider` abstraction; deterministic provider (default) + anthropic provider.
 * Investigation orchestration → structured report (facts/hypotheses/unknowns/recos).
 * Independent citation verification (dangling citations caught).
 * Untrusted-data flagging; injection does not change the stub's decision.
-* Evaluation harness: baselines A/B/C + run manifest.
-* **27/27 tests pass** (`pytest`). CLI and editable install verified.
-* Scenario ground-truth contract (`schemas/scenario.py`), exported via `schemas/__init__.py`, with three scenario data files (`data/scenarios/`) and a parametrized loader test.
+* Scenario ground-truth contract (`schemas/scenario.py`), exported via `schemas/__init__.py`.
 * Cleanup: brute-force threshold centralized in `constants.py` (DRY); deterministic provider emits the scanner-check recommendation once, from scanner knowledge only.
-* `DatasetManifest` contract + tests (`schemas/dataset_manifest.py`), exported via `schemas/__init__.py` (license NAME kept separate from VERIFICATION status).
-* `DATASETS.md`: registry of candidate datasets and RAG knowledge sources — all licenses marked **unverified**, **no data downloaded**, nothing verified claimed as fact.
-* **48/48 tests pass** (`pytest`), validated on Windows.
-* Reproducible content hashing: `datasets/checksum.py` (`sha256_file`/`sha256_dir`, order- and OS-independent) + `scripts/hash_dataset.py` CLI.
-* **Dataset licenses verified on primary sources**: GUIDE = `CDLA-Permissive-2.0` (Kaggle); AIT-ADS = `CC BY 4.0` (Zenodo 8263181); AIT-LDSv2 logs = `CC BY-NC-SA 4.0` (Zenodo V2.1). Correction: AIT-ADS is CC BY 4.0, not NC/SA as earlier assumed.
-* GUIDE and AIT-ADS **acquired locally** under git-ignored `data/external/` (not committed); AIT-LDSv2 `_no-pcaps` kept outside the repo for now.
-* Machine-readable manifests `data/manifests/{ait-ads,microsoft-guide}.json` (status `acquired`, verified licenses + real sha256 of the local copy), validated by `tests/test_manifests_load.py`.
-* **AIT-ADS Wazuh loader** (`datasets/ait_ads.py`): streams the JSON-Lines alert files (hundreds of MB) into `RawAlert`s with flat memory; verified on the real 469 MB `fox_wazuh.json`.
-* **AIT-ADS ground truth** (`datasets/ait_ads_labels.py`): attack time-windows from `labels.csv`, half-open `[start, end)`, UTC-normalized; pure `attack_at()` labeler.
-* **Labeled scan + descriptive summary** (`summarize_labeled_wazuh`) + CLI `scripts/sample_ait_ads.py` — benign/attack composition per testbed (dataset statistics, explicitly **not** detection performance).
-* **Ground-truth verified**: our labels are a reconstructed `time_label` (timestamp ∈ attack window from `labels.csv`); the official per-event `event_label` is NOT in the Zenodo record (only `ait_ads.zip` + `labels.csv`) and is not used. Obtaining it would require the AIT-ADS pipeline + AIT-LDSv2/AIT-NDS.
-* **Rule-composition diagnostic** (`datasets/ait_ads_diagnostics.py` + CLI `scripts/diagnose_ait_ads_rules.py`): per-rule attack/benign breakdown, ambiguous rules, trivially-separating rules, temporal-label leakage count, missing-field and embedded-label checks.
-* **Diagnostic run on fox/Wazuh** (462,523 alerts): attack class dominated by `dirb` web scan (98.5%); rule 31101 alone ≈92% of positives, 8 rules ≈99.6% (near-trivial separability / leakage). High-value stages rare (priv-esc=10). Findings documented in `data/manifests/ait-ads.json` (known\_limitations) and `docs/EVALUATION.md` §5.1. **Dataset statistics, not detection performance.**
-* **Attack-phase extractor** (`iter_alerts_for_attacks` + `scripts/extract_ait_ads_attack.py`): pulls the real alerts of a given attack phase for inspection.
-* **First reference investigation scenario**`data/scenarios/scenario_fox_privesc_shadow.json`: 10 REAL fox/Wazuh events (www-data → su phopkins → sudo root → `cat /etc/shadow`), `expected_disposition=escalate`, `expected_techniques=[T1548.003, T1003.008]` (observed execution only; T1078/T1505.003 documented as not-demonstrated in metadata). Label provenance = `time_label` (not causal) explicitly recorded. All events upfront → tests chain reconstruction, NOT tool retrieval (noted for a future scenario). **Not a benchmark.**
-* **Baseline B/C scenario runner** (`scripts/run_scenario.py`, `--rag` for C) + tests: runs a Scenario end-to-end through the deterministic pipeline, no API. Observed on `fox-privesc-shadow` (descriptive, NOT performance): both B and C give `insufficient_evidence` (≠ reference `escalate`), 10 grounded/supported facts, citation verification passes. RAG (C) retrieves only the sample KB's brute-force/valid-accounts/scanner docs at very low scores (<0.05); it adds 4 off-topic hypotheses + 1 misleading scanner recommendation. Disposition is KB-insensitive for the stub (C−B = 0). **Not a performance measurement.**
-* **96/96 tests pass** (`pytest`), validated on Windows.
+* `DatasetManifest` contract + tests; license NAME kept separate from VERIFICATION status.
+* `DATASETS.md`: registry of candidate datasets and RAG knowledge sources.
+* Reproducible content hashing: `datasets/checksum.py` + `scripts/hash_dataset.py` CLI.
+* **Dataset licenses verified on primary sources**: GUIDE = `CDLA-Permissive-2.0` (Kaggle); AIT-ADS = `CC BY 4.0` (Zenodo 8263181); AIT-LDSv2 logs = `CC BY-NC-SA 4.0` (Zenodo V2.1).
+* GUIDE and AIT-ADS **acquired locally** under git-ignored `data/external/`.
+* Machine-readable manifests `data/manifests/{ait-ads,microsoft-guide}.json`.
+* **AIT-ADS Wazuh loader** (`datasets/ait_ads.py`): streams the JSON-Lines alert files with flat memory; verified on the real 469 MB `fox_wazuh.json`.
+* **AIT-ADS ground truth** (`datasets/ait_ads_labels.py`): attack time-windows from `labels.csv`, half-open `[start, end)`, UTC-normalized. **Reconstructed `time_label`**; the official per-event `event_label` is NOT in the Zenodo record and is not used.
+* **Rule-composition diagnostic** + CLI; run on fox/Wazuh (462,523 alerts): attack class dominated by `dirb` web scan (98.5%); near-trivial separability / leakage documented in `docs/EVALUATION.md` §5.1. **Dataset statistics, not detection performance.**
+* **Attack-phase extractor** (`iter_alerts_for_attacks` + `scripts/extract_ait_ads_attack.py`).
+* **Reference scenario #1**`data/scenarios/scenario_fox_privesc_shadow.json`: 10 REAL fox/Wazuh events (www-data → su phopkins → sudo root → `cat /etc/shadow`), `expected_disposition=escalate`, `expected_techniques=[T1548.003, T1003.008]` (observed execution only). Label provenance = `time_label`. **Not a benchmark.**
+* **Reference scenario #2**`data/scenarios/scenario_fox_dnsteal.json`: curated 10-event subset of REAL fox alerts from the `dnsteal` window (DNS `.cloud` trigger + TLS anomalies on a *different* host + automated WordPress attempt + benign Dovecot noise). `expected_disposition=escalate` (**investigation**, NOT confirmed exfiltration); `expected_techniques=[]` — candidates T1048 / T1071.004 kept as **hypotheses** in metadata (IDs verified on official MITRE ATT&CK). Source window (381 alerts, 336 benign Dovecot) vs curated subset explicitly documented. **Not a benchmark.**
+* **Sample KB extended** (`data/knowledge/mitre_sample.json`, version `sample-2026-10-22`): added `KB-T1548-003` (sudo-to-root) and `KB-T1003-008` (/etc/shadow access) — **closes the earlier RAG coverage gap** on the fox-privesc case. Retrieval coverage asserted by `tests/test_rag_privesc_coverage.py` (T1548.003 and T1003.008 both in top-5).
+* **Anthropic provider hardened** (`llm/anthropic_provider.py`): explicit parse/validate errors, single-fence unwrap, no silent deterministic fallback; 8 mocked unit tests.
+* **Reproducibility**: scenario/eval tests pin `Settings(llm_provider="deterministic")` so runs never depend on the ambient env / a local `.env`.
+* **Baseline B/C scenario runner** (`scripts/run_scenario.py`, `--rag` for C) + tests.
+* **Evaluation harness consolidated** on `data/scenarios/*.json` as the single scenario source (replaces the `sample_scenarios.json` pointer list; the `data/alerts/` fixtures remain for unit tests). `evals/run_eval.py` runs A/B/C over all 5 scenarios, records a manifest (`evals/results/`, git-ignored) with per-scenario disposition vs reference, per-baseline agreement, provider/model/seed, prompt version, git commit. Harness test `tests/test_eval_harness.py` (coverage + the C=B disposition-invariance invariant).
+* **First honest evaluation run (EXP-0001)**: A=B=C agree **3/5**; the 3 synthetic cases match, **both real fox cases are missed** (stub → `insufficient_evidence` vs reference `escalate`); **C=B** (RAG disposition-invariant). Recorded in `docs/experiments/EXP-0001-reference-triage-baselines.md`. **Descriptive, not performance.**
+* **121/121 tests pass** (`pytest`), validated on Windows.
 
 ## In progress / next candidates
 
@@ -46,6 +46,7 @@ Canonical status file (project instructions §7). Updated at each significant st
 ## Not implemented (by design, pending measured need)
 
 * Tool-use investigation step (N3) and independent challenge (N4) → baselines D/E.
+* Real Anthropic provider never actually invoked (no API call made); Baseline B-real NOT YET MEASURED.
 * Public-dataset evaluation (GUIDE, AIT) with held-out splits.
 * pgvector store wiring (needs embedding-model ADR); FastAPI API; MLOps/observability.
 * BM25 scoring (D8); hybrid/rerank retrieval.
@@ -53,9 +54,9 @@ Canonical status file (project instructions §7). Updated at each significant st
 ## Known limitations
 
 * Default "analyst" is a rule-based stub; no real-LLM quality/robustness measured.
+* The rule-based triage only reaches the reference disposition on brute-force-shaped signals; it misses both real reference cases (EXP-0001). Expected for a stub, recorded.
 * Retrieval is lexical token-overlap (not BM25/vectors).
-* Sample KB (`data/knowledge/mitre_sample.json`) has no document for privilege escalation (T1548.003) or /etc/shadow credential access (T1003.008) → RAG coverage gap on the fox-privesc case (observed; not a general RAG verdict).
-* Sample scenarios are a smoke test, not a benchmark.
+* The 5-scenario suite is a smoke test, not a benchmark; synthetic cases encode our own assumptions (circularity) and the fox ground truth is a `time_label`, not `event_label`.
 
 ## Open decisions (see docs)
 
@@ -63,4 +64,4 @@ D1 contribution framing · D2 agent orchestration · D3 vector engine · D4 LLM 
 
 ## Next immediate task (proposed, not started)
 
-First reference scenario built and run end-to-end on Baselines B and C (deterministic, no API). Open decision for the next increment (to choose): (1) enrich the sample KB with T1548.003 / T1003.008 stubs — improves retrieval relevance/hypotheses only, NOT the stub's disposition (KB-insensitive); or (2) wire the real Anthropic provider (Baseline B-real) — the actual capability jump (needs API key, cost, fixed temperature/seed per EVALUATION §7.c). Deferred: Scenario→evals harness integration (needs the §7.b investigation rubric, not yet implemented); a trigger-only + read-only-tools scenario variant (N3).
+Two reference scenarios built, KB coverage closed, harness consolidated, first honest result produced (EXP-0001: stub 3/5, misses both real cases, C=B). Open decision for the next increment (to choose): (1) **Baseline B-real** — wire the real Anthropic provider on ONE scenario to get the first non-stub data point (needs API key + a small budget; fixed temperature per EVALUATION §7.c); this is the actual capability jump the 3/5 result motivates. Or (2) **enlarge the reference suite** — more real AIT scenarios (and a trigger-only + read-only-tools variant for N3) to make the evaluation less dependent on 2 cases. Or (3) **`docs/THREAT_MODEL.md`** + ADRs to pay down documentation/decision debt before the LLM step.
