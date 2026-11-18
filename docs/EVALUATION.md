@@ -1,7 +1,7 @@
 # SENTINEL-X — Protocole d'évaluation
 
 * **Statut** : protocole de référence (v0.2). À figer *avant* toute analyse de résultats.
-* **Date** : 2026-10-20 (ajout §5.1 : caractérisation mesurée des labels AIT-ADS)
+* **Date** : 2026-10-28 (ajout §5.2 : définition canonique `expected_techniques` ; §5.3 : contexte initial vs post-investigation pour les scénarios à outils) ; 2026-10-20 (§5.1)
 * **Principe directeur** : *aucune capacité IA n'est « acquise » sans mesure vs au moins une baseline adaptée.* L'évaluation **renforce** le produit (Composante B), elle ne le remplace pas.
 * **Documents liés** : conception → `docs/architecture/CONCEPTION_DE_REFERENCE.md` · état de l'art → `docs/research/state-of-the-art.md`.
 * **Note d'honnêteté** : ce document définit *comment* mesurer. Il ne contient **aucun résultat** : toute valeur future est `NON ENCORE MESURÉ` tant qu'elle n'a pas été produite et journalisée.
@@ -110,6 +110,23 @@ Rappel : nos labels sont un **`time_label`** reconstruit (alerte « attaque » s
 * **Métriques** : proscrire l'**accuracy au niveau alerte** ; si triage alerte, **stratifier par type d'attaque**, **traiter le scan web volumétrique à part**, prioriser **PR-AUC / rappel par classe**, et **pondérer les étapes rares** (priv-esc, exfil).
 * **Dev/test** : un split **aléatoire au niveau alerte** fait fuiter l'unique burst `dirb` entre dev et test (mémorisation de la règle 31101). **Splitter par temps et/ou par testbed/scénario**, en gardant chaque **phase d'attaque entière** d'un seul côté.
 * **Cadrage** : préférer l'évaluation **au niveau incident/investigation** (la chaîne d'attaque, Famille I) à un triage binaire au niveau alerte sur ce label bruité.
+
+### 5.2 `expected_techniques` — définition canonique
+
+Convention appliquée de façon **cohérente** à tous les scénarios (méthodologie, pas un résultat). `expected_techniques` ne contient **jamais** de technique candidate présentée comme confirmée.
+
+* **Scénarios synthétiques** : les techniques que le scénario a été **conçu** pour représenter (vérité-terrain par construction). Un scénario conçu pour être indécidable (disposition `insufficient_evidence`) n'établit **aucune** technique → `[]`.
+* **Scénarios issus de données réelles** : uniquement les techniques **établies par la télémétrie elle-même** — comportement déterminant **directement journalisé**, **non** raisonnablement explicable par une activité bénigne, **indépendant** de l'attribution à un attaquant, et **sans** s'appuyer sur le `time_label`. Tout le reste (inférence de motif, attribution, simple « compatible avec ») est une **candidate/hypothèse** et vit dans `metadata` (p. ex. `attack_candidates`).
+
+Application : `fox-privesc-shadow` = `[T1548.003, T1003.008]` (actions `sudo→root` et `cat /etc/shadow` journalisées) ; `fox-dnsteal-dns-exfil` = `[]` (aucune action d'exfiltration journalisée) ; `fox-cracking-webmail-cred` = `[]` (T1110/T1078 candidates : échec→succès explicable béninement, attribution non prouvée) ; `SC-AMBIGUOUS-001` = `[]` (conçu indécidable ; T1078 candidate). Les scénarios brute-force synthétiques conservent `[T1110]` (conçus comme tels).
+
+### 5.3 Contexte initial vs post-investigation (scénarios à récupération par outils)
+
+Certains scénarios (`requires_tool_retrieval=true`) ne livrent dans le **contexte initial** que le déclencheur et des distracteurs ; les preuves décisives sont dans `retrievable_events`, destinées à être récupérées par des **outils** (Famille I, niveau N3).
+
+* `initial_context_disposition` est une **référence de triage choisie et justifiée méthodologiquement** (pas un fait fourni par le dataset) : la décision correcte sur le **seul** contexte initial.
+* `expected_disposition` est la disposition de référence **après investigation** (outils ayant récupéré `retrievable_events`).
+* Les baselines **sans outils** (A/B/C) sont évaluées **uniquement** sur la triage de contexte initial, comparées à `initial_context_disposition`. Leur `match` signifie « triage initial conforme à la référence choisie », **jamais** « compromission détectée ». La disposition post-investigation n'est évaluée **que** par une future baseline à outils (D), **non implémentée**.
 
 ---
 

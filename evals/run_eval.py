@@ -95,29 +95,68 @@ def _run_baseline_on_alert(baseline_key: str, raw_alert, settings, store) -> dic
     }
 
 
+def _initial_context_ground_truth(sc) -> tuple[str, str]:
+    """Ground truth a TOOL-LESS baseline (A/B/C) is scored against, plus its basis.
+
+    Tool-less baselines only ever see the initial alert context, so they are always
+    scored on INITIAL-CONTEXT triage. The rule is explicit (no implicit fallback):
+
+    - requires_tool_retrieval scenario: the decisive evidence is deliberately withheld
+      from the initial context, so the valid reference is `initial_context_disposition`
+      (a CHOSEN methodological triage reference, not a dataset fact). It is required.
+    - otherwise: the initial context IS the full alert, so the reference is
+      `expected_disposition` (identical to the pre-change behavior -> no regression).
+    """
+    if sc.requires_tool_retrieval:
+        if sc.initial_context_disposition is None:
+            raise ValueError(
+                f"{sc.scenario_id}: requires_tool_retrieval=True but "
+                "initial_context_disposition is not set."
+            )
+        return sc.initial_context_disposition.value, "initial_context_disposition"
+    return sc.expected_disposition.value, "expected_disposition"
+
+
 def evaluate(settings, store, scenarios) -> dict:
-    """Run every runnable baseline over every scenario; return per-baseline results."""
+    """Run every runnable baseline over every scenario; return per-baseline results.
+
+    Baselines A/B/C are TOOL-LESS: each runs on `sc.alert` only. `retrievable_events`
+    are never passed to them (that would defeat the tool-retrieval design), so these
+    rows measure initial-context triage, scored via _initial_context_ground_truth.
+    """
     runnable = [b for b in BASELINES.values() if b.implemented]
     per_baseline: dict[str, dict] = {}
     for b in runnable:
         rows = []
         agree = 0
         for fname, sc in scenarios:
-            expected = sc.expected_disposition.value
+            ground_truth, basis = _initial_context_ground_truth(sc)
+            # sc.alert carries ONLY the initial context; retrievable_events are excluded.
             res = _run_baseline_on_alert(b.key, sc.alert, settings, store)
-            match = res["disposition"] == expected
+            match = res["disposition"] == ground_truth
             agree += int(match)
-            rows.append(
-                {
-                    "scenario_file": fname,
-                    "scenario_id": sc.scenario_id,
-                    "ground_truth": expected,
-                    "got": res["disposition"],
-                    "match": match,
-                    "verification_passed": res["verification_passed"],
-                    "cost_usd": res["cost_usd"],
-                }
-            )
+            row = {
+                "scenario_file": fname,
+                "scenario_id": sc.scenario_id,
+                "capability_evaluated": "triage_initial_context_no_tools",
+                "ground_truth": ground_truth,
+                "ground_truth_basis": basis,
+                "got": res["disposition"],
+                "match": match,
+                "verification_passed": res["verification_passed"],
+                "cost_usd": res["cost_usd"],
+            }
+            if sc.requires_tool_retrieval:
+                # Record (but do NOT score) the post-investigation reference, and spell
+                # out what a match means here so the row is not misread as detection.
+                row["post_investigation_reference"] = sc.expected_disposition.value
+                row["match_meaning"] = (
+                    "match=true means the initial-context triage matches the chosen "
+                    "initial_context_disposition reference; it does NOT mean the "
+                    "compromise was detected (that requires tool retrieval / Baseline D, "
+                    "not implemented)."
+                )
+            rows.append(row)
         per_baseline[b.key] = {
             "label": b.label,
             "agreement_with_ground_truth": f"{agree}/{len(scenarios)}",
@@ -142,6 +181,25 @@ def main() -> int:
         "scenario_source": str(_SCENARIO_DIR / "*.json"),
         "scenario_count": len(scenarios),
         "scenario_ids": [sc.scenario_id for _, sc in scenarios],
+        "capability_evaluated": (
+            "Baselines A/B/C evaluate INITIAL-CONTEXT triage WITHOUT tools. For "
+            "requires_tool_retrieval scenarios the decisive evidence is in "
+            "retrievable_events (never given to these baselines) and their "
+            "post-investigation disposition is NOT evaluated here (needs Baseline D, "
+            "not implemented). A match on such a scenario means correct initial-context "
+            "triage against a chosen reference, NOT detection of the compromise."
+        ),
+        "tool_retrieval_scenarios": [
+            sc.scenario_id for _, sc in scenarios if sc.requires_tool_retrieval
+        ],
+        "scoring_note": (
+            "Tool-less baselines are scored per scenario via ground_truth_basis: "
+            "'expected_disposition' for full-context scenarios (unchanged from before, "
+            "so historical per-scenario results stay comparable) and "
+            "'initial_context_disposition' for tool-retrieval scenarios. Adding a "
+            "tool-retrieval scenario raises the denominator but does not alter how any "
+            "existing scenario is scored."
+        ),
         "knowledge_version": _KNOWLEDGE_VERSION,
         "llm_provider": settings.llm_provider,
         "llm_model": settings.llm_model,
@@ -152,12 +210,12 @@ def main() -> int:
         "baselines_not_implemented": [k for k, b in BASELINES.items() if not b.implemented],
         "results": per_baseline,
         "disclaimer": (
-            "NOT a scientific benchmark. Five scenarios (three hand-authored "
-            "synthetic + two AIT-ADS-grounded reference cases, ground truth = "
-            "reference-analyst disposition informed by the dataset time_label, "
-            "not a certified event_label). The default analyst is a deterministic "
-            "rule-based stub; no value here is real-LLM performance. "
-            "See docs/EVALUATION.md."
+            "NOT a scientific benchmark. Hand-authored synthetic + AIT-ADS-grounded "
+            "reference cases; ground truth = reference-analyst disposition informed by "
+            "the dataset time_label, not a certified event_label. Tool-retrieval "
+            "scenarios are scored only on initial-context triage (see "
+            "capability_evaluated). The default analyst is a deterministic rule-based "
+            "stub; no value here is real-LLM performance. See docs/EVALUATION.md."
         ),
     }
 

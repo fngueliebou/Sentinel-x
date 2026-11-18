@@ -71,3 +71,66 @@ def test_stub_runs_report_zero_cost():
     for key in ("A", "B", "C"):
         for r in results[key]["rows"]:
             assert r["cost_usd"] == 0.0
+
+
+# --- Capability-aware scoring (tool-retrieval scenarios) ------------------------
+
+def test_all_rows_are_labelled_initial_context_triage():
+    _scenarios, results = _results()
+    # Every row must declare the capability it measures and the basis of its ground
+    # truth, so no comparison is implicit.
+    for key in ("A", "B", "C"):
+        for r in results[key]["rows"]:
+            assert r["capability_evaluated"] == "triage_initial_context_no_tools"
+            assert r["ground_truth_basis"] in {
+                "expected_disposition",
+                "initial_context_disposition",
+            }
+
+
+def test_full_context_scenarios_scored_against_expected_disposition():
+    # No regression: scenarios WITHOUT tool retrieval keep being scored against
+    # expected_disposition exactly as before the capability-aware change.
+    scenarios, results = _results()
+    non_tool = {
+        sc.scenario_id for _, sc in scenarios if not sc.requires_tool_retrieval
+    }
+    assert non_tool  # sanity
+    for key in ("A", "B", "C"):
+        for r in results[key]["rows"]:
+            if r["scenario_id"] in non_tool:
+                assert r["ground_truth_basis"] == "expected_disposition"
+
+
+def test_tool_retrieval_scenario_scored_on_initial_context_not_detection():
+    scenarios, results = _results()
+    tool_ids = {sc.scenario_id for _, sc in scenarios if sc.requires_tool_retrieval}
+    assert "fox-cracking-webmail-cred" in tool_ids  # the N3 case is present
+    for key in ("A", "B", "C"):
+        row = next(
+            r for r in results[key]["rows"]
+            if r["scenario_id"] == "fox-cracking-webmail-cred"
+        )
+        # Scored against the chosen initial-context reference, not post-investigation.
+        assert row["ground_truth_basis"] == "initial_context_disposition"
+        assert row["ground_truth"] == "insufficient_evidence"
+        assert row["post_investigation_reference"] == "escalate"
+        # The row must spell out that a match is NOT detection of the compromise.
+        assert "does NOT mean the" in row["match_meaning"]
+
+
+def test_retrievable_events_are_not_fed_to_tool_less_baselines():
+    # The decisive success (christopher.friedman's Dovecot login) lives in
+    # retrievable_events; it must never enter the alert context the baselines run on.
+    # A benign 9701 for another user may be present as initial-context noise.
+    scenarios, _ = _results()
+    sc = next(sc for _, sc in scenarios if sc.scenario_id == "fox-cracking-webmail-cred")
+
+    def is_decisive_success(e):
+        return (
+            e.attributes.get("rule_id") == "9701"
+            and e.attributes.get("user") == "christopher.friedman"
+        )
+
+    assert not any(is_decisive_success(e) for e in sc.alert.events)
+    assert any(is_decisive_success(e) for e in sc.retrievable_events)

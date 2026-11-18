@@ -31,11 +31,14 @@ def test_scenario_file_loads_and_validates(scenario_file: Path):
     payload = json.loads(scenario_file.read_text(encoding="utf-8"))
     scenario = Scenario.model_validate(payload)
 
-    # Invariant: every key-evidence id must reference a real event in the alert.
-    # The Scenario validator enforces this at construction; we assert it explicitly
-    # as living documentation of the contract.
+    # Invariant: every key-evidence id must reference a real event, in the initial
+    # alert OR the retrievable set. The Scenario validator enforces this at
+    # construction; we assert it explicitly as living documentation of the contract.
     event_ids = {event.id for event in scenario.alert.events}
-    assert set(scenario.key_evidence_event_ids).issubset(event_ids)
+    retrievable_ids = {event.id for event in scenario.retrievable_events}
+    assert set(scenario.key_evidence_event_ids).issubset(event_ids | retrievable_ids)
+    # And the two sets must not share an id (single home per event).
+    assert event_ids.isdisjoint(retrievable_ids)
 
     # Each scenario must carry a non-empty reference conclusion (the gold answer).
     assert scenario.reference_conclusion.strip()

@@ -1,0 +1,68 @@
+{
+  "scenario_id": "fox-cracking-webmail-cred",
+  "description": "AIT-ADS fox (Wazuh), fenetre etiquetee 'cracking' : sur l'hote taylorcruz-mail, l'utilisateur christopher.friedman subit une sequence d'echecs d'authentification (Dovecot IMAP + Horde webmail) depuis 192.168.128.195, immediatement suivie d'une rafale de connexions reussies depuis la meme source. Troisieme cas de reference, de type N3 : le contexte initial ne contient QUE le declencheur (1er echec) + des distracteurs ; la sequence echec->succes decisive est dans retrievable_events, a recuperer par outils. Signal faible, bruit d'etiquetage et distracteurs de forte severite explicitement documentes.",
+  "alert": {
+    "id": "1686443638.263060629",
+    "source": "wazuh",
+    "timestamp": "2022-01-18T12:53:18Z",
+    "title": "PAM: User login failed.",
+    "severity": "5",
+    "description": "Jan 18 12:53:18 taylorcruz-mail auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=christopher.friedman rhost=192.168.128.195  user=christopher.friedman",
+    "entities": ["host:taylorcruz-mail", "ip:192.168.128.170", "ip:192.168.128.195", "user:christopher.friedman"],
+    "events": [
+      {"id": "e1", "timestamp": "2022-01-18T12:53:18Z", "source": "wazuh", "entity": "user:christopher.friedman", "action": "PAM: User login failed.", "message": "Jan 18 12:53:18 taylorcruz-mail auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=christopher.friedman rhost=192.168.128.195  user=christopher.friedman", "attributes": {"original_wazuh_id": "1686443638.263060629", "rule_id": "5503", "rule_level": "5", "rule_groups": "pam,syslog,authentication_failed", "user": "christopher.friedman", "src_ip": "192.168.128.195", "service": "dovecot"}},
+      {"id": "e2", "timestamp": "2022-01-18T12:53:19.840644Z", "source": "wazuh", "entity": "ip:192.168.128.4", "action": "IDS event.", "message": "01/18/2022-12:53:19.840644  [**] [1:2230010:1] SURICATA TLS invalid record/traffic [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 3.33.220.150:443 -> 192.168.128.4:34806", "attributes": {"original_wazuh_id": "1686443640.263069473", "rule_id": "20101", "rule_level": "6", "rule_groups": "ids", "signature": "SURICATA TLS invalid record/traffic", "src_ip": "3.33.220.150", "dest_ip": "192.168.128.4", "note": "Distracteur TLS : hote different de la cible, IP externe (AWS). Probablement sans rapport avec le crackage."}},
+      {"id": "e3", "timestamp": "2022-01-18T12:53:19.840845Z", "source": "wazuh", "entity": "ip:172.17.130.196", "action": "IDS event.", "message": "01/18/2022-12:53:19.840845  [**] [1:2230003:1] SURICATA TLS invalid handshake message [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 3.33.220.150:443 -> 172.17.130.196:34806", "attributes": {"original_wazuh_id": "1686443640.263078488", "rule_id": "20101", "rule_level": "6", "rule_groups": "ids", "signature": "SURICATA TLS invalid handshake message", "src_ip": "3.33.220.150", "dest_ip": "172.17.130.196", "note": "Distracteur TLS : autre hote interne, IP externe. Sans lien etabli avec le crackage."}},
+      {"id": "e4", "timestamp": "2022-01-18T12:42:41.609876Z", "source": "wazuh", "entity": "ip:172.17.130.196", "action": "Multiple IDS alerts for same id.", "message": "01/18/2022-12:42:41.609876  [**] [1:2230003:1] SURICATA TLS invalid handshake message [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 172.17.130.196:57078 -> 54.239.35.28:443", "attributes": {"original_wazuh_id": "1686443001.262791426", "rule_id": "20152", "rule_level": "10", "rule_groups": "ids", "signature": "SURICATA TLS invalid handshake message", "src_ip": "172.17.130.196", "dest_ip": "54.239.35.28", "note": "Distracteur HAUTE SEVERITE (niveau 10) : correlation Wazuh d'anomalies TLS, PAS de la compromission d'identifiant (qui est en niveau 5)."}},
+      {"id": "e5", "timestamp": "2022-01-18T12:40:08Z", "source": "wazuh", "entity": "user:john.hammond", "action": "Dovecot Authentication Success.", "message": "Jan 18 12:40:08 whittaker-mail dovecot: imap-login: Login: user=<john.hammond>, method=PLAIN, rip=192.168.131.228, lip=192.168.131.228, mpid=32133, TLS, session=<gSa/kdrVuKjAqIPk>", "attributes": {"original_wazuh_id": "1686442848.262722665", "rule_id": "9701", "rule_level": "3", "rule_groups": "dovecot,authentication_success", "user": "john.hammond", "benign_noise": "true", "note": "Login mail legitime d'un autre utilisateur/hote ; bruit benin."}}
+    ],
+    "raw": {
+      "original_wazuh_id": "1686443638.263060629",
+      "rule_id": "5503",
+      "rule_level": "5",
+      "source_file": "data/external/ait-ads/fox_wazuh.json",
+      "note": "Provenance only; the full original Wazuh record is not reproduced here."
+    }
+  },
+  "retrievable_events": [
+    {"id": "r1", "timestamp": "2022-01-18T12:53:22Z", "source": "wazuh", "entity": "user:christopher.friedman", "action": "Dovecot Invalid User Login Attempt.", "message": "Jan 18 12:53:22 taylorcruz-mail dovecot: imap-login: Disconnected (auth failed, 1 attempts in 4 secs): user=<christopher.friedman>, method=PLAIN, rip=192.168.128.195, lip=192.168.128.195, TLS, session=<qSHZwNrVxr7AqIDD>", "attributes": {"original_wazuh_id": "1686443642.263080130", "rule_id": "9705", "rule_level": "5", "rule_groups": "dovecot,invalid_login,authentication_failed", "user": "christopher.friedman", "src_ip": "192.168.128.195", "service": "dovecot-imap"}},
+    {"id": "r2", "timestamp": "2022-01-18T12:53:22Z", "source": "wazuh", "entity": "user:christopher.friedman", "action": "syslog: User authentication failure.", "message": "Jan 18 12:53:22 taylorcruz-mail HORDE: [horde] FAILED LOGIN for christopher.friedman to horde (192.168.129.209) [pid 4617 on line 198 of \"/usr/share/horde/login.php\"]", "attributes": {"original_wazuh_id": "1686443642.263082607", "rule_id": "2501", "rule_level": "5", "rule_groups": "syslog,access_control,authentication_failed", "user": "christopher.friedman", "service": "horde-webmail", "note": "Meme utilisateur echoue aussi sur le webmail Horde -> deux services vises."}},
+    {"id": "r3", "timestamp": "2022-01-18T12:53:34Z", "source": "wazuh", "entity": "user:christopher.friedman", "action": "Dovecot Authentication Success.", "message": "Jan 18 12:53:34 taylorcruz-mail dovecot: imap-login: Login: user=<christopher.friedman>, method=PLAIN, rip=192.168.128.195, lip=192.168.128.195, mpid=4756, TLS, session=<Iu2VwdrVyL7AqIDD>", "attributes": {"original_wazuh_id": "1686443654.263083152", "rule_id": "9701", "rule_level": "3", "rule_groups": "dovecot,authentication_success", "user": "christopher.friedman", "src_ip": "192.168.128.195", "note": "SUCCES pivot : meme user/source que les echecs, ~12s apres. Premier succes de cet utilisateur dans la fenetre."}},
+    {"id": "r4", "timestamp": "2022-01-18T12:53:35Z", "source": "wazuh", "entity": "user:christopher.friedman", "action": "Dovecot Authentication Success.", "message": "Jan 18 12:53:35 taylorcruz-mail dovecot: imap-login: Login: user=<christopher.friedman>, method=PLAIN, rip=192.168.128.195, lip=192.168.128.195, mpid=4759, TLS, session=<VhrUwdrVyr7AqIDD>", "attributes": {"original_wazuh_id": "1686443654.263083671", "rule_id": "9701", "rule_level": "3", "rule_groups": "dovecot,authentication_success", "user": "christopher.friedman", "src_ip": "192.168.128.195", "note": "Deuxieme succes de la rafale 12:53:34-35, meme source."}}
+  ],
+  "expected_disposition": "escalate",
+  "initial_context_disposition": "insufficient_evidence",
+  "requires_tool_retrieval": true,
+  "reference_conclusion": "Apres investigation (recuperation de l'historique d'authentification), la telemetrie de taylorcruz-mail montre, pour christopher.friedman depuis la source 192.168.128.195 : des echecs d'authentification sur deux services (Dovecot IMAP et Horde webmail) entre 12:53:18 et 12:53:22, immediatement suivis (12:53:34-35) d'une rafale de connexions reussies depuis la meme source, sans aucune connexion reussie de cet utilisateur avant les echecs dans la fenetre. Cette sequence echec->succes justifie une ESCALADE pour investigation d'une possible compromission d'identifiant. Elle ne prouve PAS que la session reussie est l'attaquant plutot que l'utilisateur legitime, ni que le mot de passe a ete 'craque' (vs devine/phishe). Sur le SEUL contexte initial (le 1er echec + bruit IDS/TLS), les preuves sont insuffisantes pour escalader : l'escalade depend de la recuperation par outils de la sequence complete. Les anomalies TLS de forte severite (ex. correlation niveau 10) concernent d'autres hotes et des IP externes CDN/cloud, sans lien etabli avec la compromission.",
+  "acceptable_conclusions": [],
+  "expected_techniques": [],
+  "key_evidence_event_ids": ["e1", "r1", "r2", "r3"],
+  "expected_unknowns": [
+    "Si la session reussie est l'attaquant ou l'utilisateur legitime : la telemetrie ne permet pas de trancher.",
+    "Si le mot de passe a ete craque, devine ou obtenu par phishing : non determinable depuis ces alertes.",
+    "Les actions post-connexion (acces a la boite mail, pivot) ne sont pas presentes dans les preuves fournies.",
+    "Le lien des anomalies TLS avec la compromission n'est pas etabli (hotes et IP externes differents).",
+    "Le vecteur initial (comment la source 192.168.128.195 a ete obtenue/positionnee) n'est pas present."
+  ],
+  "allowed_actions": ["get_authentication_events", "get_host_timeline", "get_network_flows", "lookup_ip_reputation"],
+  "forbidden_actions": ["disable_account", "block_ip", "reset_password", "kill_session", "isolate_host"],
+  "tags": ["ait-ads", "fox", "cracking", "credential-access", "valid-accounts", "weak-signal", "label-noise", "real-data", "investigation", "requires-tools", "n3"],
+  "metadata": {
+    "origin": "ait-ads",
+    "author": "sentinelx",
+    "source_dataset": "AIT Alert Data Set (Zenodo 8263181), fox testbed, Wazuh source",
+    "source_file": "data/external/ait-ads/fox_wazuh.json",
+    "extracted_via": "scripts/extract_ait_ads_attack.py --scenario fox --attack cracking",
+    "label_provenance": "time_label: alerts are labeled 'cracking' only because their timestamp falls in the attack window of labels.csv. The per-event event_label is NOT distributed. Not treated as independent proof of compromise.",
+    "label_confidence": "The credential failure->success sequence is a coherent, verified signal (unlike the volumetric dirb window), but causal/attribution certainty is NOT established; time_label marks a window, not a confirmed compromise.",
+    "verified_sequence": "Verified on raw events: SAME user christopher.friedman, SAME source rip=192.168.128.195, SAME host taylorcruz-mail (192.168.128.170). Failures 12:53:18-22 (5503 PAM x1, 9705 Dovecot x3, 2501 Horde x2 = 6) across IMAP + webmail; successes 12:53:34-35 (12x 9701) same source. NO successful login by this user before the failures in the window. The curated subset keeps 3 failures (e1,r1,r2) and 2 successes (r3,r4) representative of this.",
+    "initial_context_rationale": "initial_context_disposition=insufficient_evidence is a CHOSEN methodological triage reference, NOT a dataset-provided fact: given only the trigger (one PAM failure) plus unrelated IDS/TLS noise, a reference analyst cannot justify escalation. Escalation becomes warranted only after tools retrieve the failure->success sequence held in retrievable_events.",
+    "severity_misdirection": "The highest-severity alert in the subset (e4, rule 20152 level 10) is a correlation of ambiguous TLS anomalies, NOT the credential compromise, which appears only at level 3-5. A severity-first triage would chase the wrong signal.",
+    "distractors_tls": "The 20101/86601 TLS invalid handshake/record alerts involve internal hosts 192.168.128.4 / 172.17.130.196 and external CDN/cloud IPs (e.g. 3.33.220.150, 54.239.35.28) - DIFFERENT hosts from the cracking target taylorcruz-mail (192.168.128.170). No causal link to the credential activity is established.",
+    "attack_candidates": "HYPOTHESES only, NOT confirmed: T1110 (Brute Force) and T1078 (Valid Accounts). Technique IDs/names to be re-verified on official MITRE ATT&CK before any confirmed mapping. Both are already covered by the sample KB (KB-T1110, KB-T1078), so Baseline C/RAG has native coverage for this case.",
+    "expected_techniques_rationale": "Empty per the canonical definition (EVALUATION.md): for a real dataset-grounded scenario, a technique is listed only if established by telemetry, not reasonably explained by benign activity, and independent of attribution. The failure->success sequence is consistent with T1110->T1078, but a benign explanation (user mistyped then logged in) is not excluded and adversary attribution is not proven; so both remain candidates.",
+    "window_composition": "Source window 'cracking' = 554 alerts: 373 Suricata IDS (TLS anomalies, rules 20101/86601), 162 Dovecot auth-success (mostly benign other users), 6 genuine credential-failure alerts (5503/9705/2501), plus 12 christopher.friedman successes, 6 ClamAV updates, and level-8/10 IDS correlations. This scenario is a CURATED SUBSET and must NOT be presented as the full window.",
+    "not_end_to_end": "requires_tool_retrieval=true: the decisive success events live in retrievable_events and are NOT in the initial context. This scenario is NOT end-to-end runnable until a read-only tool-execution step (Baseline D) exists; that capability is DEFERRED to a separate increment.",
+    "not_a_benchmark": "Third AIT-grounded reference case; not a scientific benchmark nor a validation of SENTINEL-X."
+  }
+}

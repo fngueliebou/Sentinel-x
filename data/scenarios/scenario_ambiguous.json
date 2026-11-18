@@ -17,11 +17,17 @@
   "expected_disposition": "insufficient_evidence",
   "reference_conclusion": "A single failed authentication for asmith was followed by a success from 198.51.100.7. The available events do not distinguish a legitimate login (after a typo) from misuse of a valid account; evidence is insufficient to confirm malicious activity.",
   "acceptable_conclusions": [],
-  "expected_techniques": ["T1078"],
+  "expected_techniques": [],
   "key_evidence_event_ids": ["e1", "e2"],
   "expected_unknowns": ["Whether the successful login was legitimate or an abuse of valid credentials — the two cannot be distinguished from the supplied events."],
   "allowed_actions": ["get_authentication_events"],
   "forbidden_actions": ["disable_account", "block_ip"],
   "tags": ["ambiguous", "auth", "valid-accounts"],
-  "metadata": {"origin": "synthetic", "author": "sentinelx", "derived_from": "data/alerts/sample_alert_ambiguous.json"}
+  "metadata": {
+    "origin": "synthetic",
+    "author": "sentinelx",
+    "derived_from": "data/alerts/sample_alert_ambiguous.json",
+    "attack_candidates": "T1078 (Valid Accounts) is a CANDIDATE/hypothesis only, not confirmed: a single failed login then success cannot distinguish a legitimate user from misuse of valid credentials.",
+    "correction_note": "expected_techniques changed from [T1078] to [] (2026-10-28) for consistency with the canonical definition (EVALUATION.md): a scenario whose disposition is insufficient_evidence, designed to be undecidable, establishes no technique. T1078 moved to a candidate above."
+  }
 }
