@@ -1,13 +1,13 @@
 # EXP-0001 — Baselines A/B/C sur la suite de scénarios de référence
 
-Fiche d'expérience suivant le gabarit `docs/EVALUATION.md` §7. Elle **journalise un résultat** ; elle vit donc hors du protocole (qui, lui, reste sans résultat).
+Fiche d'expérience suivant le gabarit `docs/EVALUATION.md`. Elle journalise un résultat, elle vit donc hors du protocole (qui, lui, reste sans résultat).
 
 
 | Champ                               | Valeur                                                                                                                                                                                                                                                                                                                   |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **ID**                              | EXP-0001                                                                                                                                                                                                                                                                                                                 |
 | **Date**                            | 2026-10-23                                                                                                                                                                                                                                                                                                               |
-| **Nature**                          | Run**descriptif**du harness (smoke) sur la suite de référence.**PAS**une expérience confirmatoire préenregistrée : aucune sélection de métrique, aucun réglage de seuil, aucun ajustement a posteriori. À rapprocher de`EVALUATION.md`§5.1 (stats descriptives ≠ performance).                                |
+| **Nature**                          | Run**descriptif**du harness (smoke) sur la suite de référence.**Pas**une expérience confirmatoire préenregistrée : aucune sélection de métrique, aucun réglage de seuil, aucun ajustement a posteriori. À rapprocher de`EVALUATION.md` (stats descriptives ≠ performance).                                    |
 | **Objectif**                        | Mesurer, de façon descriptive, si les baselines implémentées (A/B/C) atteignent la disposition de référence sur les 5 scénarios actuels, et si le RAG (C) change la disposition du stub par rapport à B.                                                                                                          |
 | **Question**                        | Famille T (triage) uniquement : disposition prédite vs disposition de référence.                                                                                                                                                                                                                                      |
 | **Dataset + version**               | `data/scenarios/*.json`(5 scénarios) : 3 synthétiques écrits à la main (`SC-AMBIGUOUS-001`,`SC-BRUTEFORCE-001`,`SC-INJECTION-001`) + 2 cas réels AIT-ADS (`fox-privesc-shadow`,`fox-dnsteal-dns-exfil`). AIT-ADS = CC BY 4.0, Zenodo 8263181. KB RAG =`data/knowledge/mitre_sample.json`version`sample-2026-10-22`. |
@@ -36,14 +36,14 @@ Fiche d'expérience suivant le gabarit `docs/EVALUATION.md` §7. Elle **journali
 
 ## Interprétation
 
-* Le stub n'atteint la référence que sur les 3 cas **synthétiques**, qui ont été écrits autour de sa propre règle (comptage de rafales d'échecs d'authentification). C'est une forme de **circularité** (`EVALUATION.md` §9 bis) : le synthétique encode nos hypothèses.
+* Le stub n'atteint la référence que sur les 3 cas **synthétiques**, qui ont été écrits autour de sa propre règle (comptage de rafales d'échecs d'authentification). C'est une forme de **circularité** (`EVALUATION.md`) : le synthétique encode nos hypothèses.
 * Sur les **2 cas réels**, il échoue : `fox-privesc` est une chaîne `su`/`sudo` sans rafale d'échecs ; `fox-dnsteal` est un signal DNS faible sans échec d'auth. La règle de triage ne généralise donc pas au-delà du brute-force.
 * **C = B** : le RAG n'influence pas la disposition du stub (elle dérive de signaux structurés, pas du savoir récupéré). Cohérent avec l'observation antérieure sur `fox-privesc` (C−B = 0).
 
 ## Limites
 
 * **5 scénarios** : ce n'est **pas** un benchmark ; aucune moyenne agrégée n'est reportée comme performance.
-* Les cas synthétiques, même corrects, **encodent nos hypothèses** → ne jamais conclure sur le seul synthétique (`EVALUATION.md` §12).
+* Les cas synthétiques, même corrects, **encodent nos hypothèses** → ne jamais conclure sur le seul synthétique (`EVALUATION.md`).
 * Vérité-terrain des fox = `time_label` reconstruit (fenêtre), pas un `event_label` certifié.
 * L'analyste par défaut est un **stub à base de règles** : aucun chiffre ici n'est une performance de vrai LLM.
 * « Accord » est un **comptage descriptif**, pas une métrique de détection validée.
