@@ -2,7 +2,7 @@
 
 Canonical status file (project instructions §7). Updated at each significant step.
 
-* **Date** : 2026-11-18
+* **Date** : 2026-11-19
 * **Phase** : construction — first vertical slice delivered; first honest evaluation run produced; first N3 (tool-retrieval) reference scenario authored as an artifact.
 * **Maturity (conception §4)** : N0 (socle) done; N1–N2 partially present via the deterministic provider; an N3 scenario artifact exists but **tool execution (Baseline D) is not implemented**; **not yet validated on public datasets**.
 
@@ -39,7 +39,7 @@ Canonical status file (project instructions §7). Updated at each significant st
 * **Baseline B/C scenario runner** (`scripts/run_scenario.py`, `--rag` for C) + tests.
 * **Evaluation harness** (`evals/run_eval.py`) over `data/scenarios/*.json` (single source). **Capability-aware scoring** (`docs/EVALUATION.md` §5.3): A/B/C are TOOL-LESS and evaluate INITIAL-CONTEXT triage only. Each manifest row carries explicit `capability_evaluated`, `ground_truth_basis` (`expected_disposition` for full-context scenarios — unchanged, so historical results stay comparable — or `initial_context_disposition` for tool-retrieval scenarios), and, for tool-retrieval rows, a `match_meaning` note stating a match is correct triage, NOT detection. `retrievable_events` are never fed to the baselines.
 * **Latest evaluation run**: A=B=C agree **4/6**. The 3 synthetic cases match; `fox-dnsteal` and `fox-privesc` are missed (stub → `insufficient_evidence` vs `escalate`); `fox-cracking` matches on **initial-context** triage (`insufficient_evidence`) — this is correct triage on a withheld-evidence case, **NOT detection of the compromise** (needs Baseline D). C=B throughout. The 3/5 run on the 5-scenario suite is recorded in `EXP-0001`; the 4/6 run currently lives in the (git-ignored) manifest only — a dedicated `EXP-0002` is not yet written.
-* **133/133 tests pass** (`pytest`), validated on Windows. Pushed: `a22fccf` (N3 increment), `2469da2` (doc edits). `origin/main` = `2469da2`.
+* **133/133 tests pass** (`pytest`), validated on Windows.
 
 ## In progress / next candidates
 
