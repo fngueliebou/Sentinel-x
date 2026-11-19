@@ -6,12 +6,7 @@ Canonical design: [`docs/architecture/CONCEPTION_DE_REFERENCE.md`](docs/architec
 State of the art: [`docs/research/state-of-the-art.md`](docs/research/state-of-the-art.md) ·
 Evaluation protocol: [`docs/EVALUATION.md`](docs/EVALUATION.md).
 
-> **Status:** first vertical slice. The end-to-end flow *ingest → normalize →
-> retrieve (RAG) → analyze → verified structured report* runs and is covered by
-> tests. The default LLM provider is an **offline deterministic stub** (no API key,
-> no network) so the slice is reproducible; a real Claude provider exists behind the
-> same interface but is **optional and not exercised by the tests**. Nothing here is
-> claimed to be production-ready, accurate, or robust — see "What is NOT done".
+> **Status:** first vertical slice. The end-to-end flow *ingest → normalize → retrieve (RAG) → analyze → verified structured report* runs and is covered by tests. The default LLM provider is an offline deterministic stub (no API key, no network) so the slice is reproducible; a real Claude provider exists behind the same interface but is optional and not exercised by the tests. Nothing here is claimed to be production-ready, accurate, or robust — see "What is not done".
 
 ## What works today (tested)
 
@@ -28,15 +23,15 @@ Evaluation protocol: [`docs/EVALUATION.md`](docs/EVALUATION.md).
 - **Independent citation verification**: a fabricated/dangling citation is caught and
   the report fails verification.
 - **Untrusted-data handling**: injection-like text in event messages is flagged and
-  does **not** change the decision (tested against the deterministic provider only).
+  does not change the decision (tested against the deterministic provider only).
 - Initial evaluation harness with baselines **A** (deterministic), **B** (LLM-only),
   **C** (LLM+RAG) and a run manifest.
 
-27 tests pass (`pytest`). See "What is NOT done" for the limits of these claims.
+27 tests pass (`pytest`). See "What is not done" for the limits of these claims.
 
 ## Requirements
 
-- Python ≥ 3.11 (developed on 3.13).
+- Python ≥ 3.11 (developed on 3.12.8).
 - No database or API key needed for the default flow.
 
 ## Install & run locally
@@ -71,13 +66,14 @@ cp .env.example .env
 # set in .env:  SENTINELX_LLM_PROVIDER=anthropic
 #               SENTINELX_LLM_API_KEY=...   SENTINELX_LLM_MODEL=<pinned-model>
 ```
+
 The Anthropic provider fences evidence as untrusted data and asks for strict JSON.
 Its correctness/robustness are **NOT YET MEASURED**.
 
 ### PostgreSQL + pgvector (scaffold only)
 
 `docker-compose.yml` starts `pgvector/pgvector:pg16` and loads `db/init/001_schema.sql`.
-It is **not required** by the current pipeline (the default knowledge store is
+It is not required by the current pipeline (the default knowledge store is
 in-memory). Set `POSTGRES_PASSWORD` in your shell/`.env` before `docker compose up -d`.
 
 ## Repository layout
@@ -103,7 +99,7 @@ docs/             the three canonical reference documents (+ archive)
 db/init/          Postgres schema (scaffold)
 ```
 
-## What is NOT done (honest limits)
+## What is not done (honest limits)
 
 - **No real-LLM measurement.** The default "analyst" is a rule-based stub. Injection
   robustness, investigation quality and hallucination rates for an actual LLM are

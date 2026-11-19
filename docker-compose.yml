@@ -1,10 +1,10 @@
 # PostgreSQL + pgvector for SENTINEL-X.
-# SCAFFOLD: the default in-memory knowledge store does NOT require this service.
+# SCAFFOLD: the default in-memory knowledge store does not require this service.
 # It is provided so the pgvector adapter (see src/sentinelx/knowledge/pgvector_store.py,
 # not yet wired into the pipeline) can be developed against a real database.
 #
 # Usage:
-#   export POSTGRES_PASSWORD=choose-a-strong-value   # never commit this
+#   export POSTGRES_PASSWORD=
 #   docker compose up -d
 #
 # No password is baked into this file on purpose.
