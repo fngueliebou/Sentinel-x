@@ -12,12 +12,7 @@ from sentinelx.security import detect_injection_patterns
 
 
 def build_query(alert: NormalizedAlert) -> str:
-    """Compose a retrieval query from the alert's title, actions and entities.
-
-    Event *messages* are deliberately NOT concatenated verbatim into the query to
-    limit the influence of untrusted free text on retrieval; structured action
-    labels are used instead.
-    """
+    """Compose a retrieval query from the alert's title, actions and entities"""
     parts: list[str] = [alert.title]
     if alert.description:
         parts.append(alert.description)

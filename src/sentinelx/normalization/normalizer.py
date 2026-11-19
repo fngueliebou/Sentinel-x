@@ -2,7 +2,6 @@
 
 No model, no network: a pure function. Severity strings are mapped onto the
 controlled vocabulary; unmapped or absent values are recorded in `missing_fields`
-rather than guessed.
 """
 
 from __future__ import annotations
@@ -40,7 +39,7 @@ def _map_numeric(value: str) -> Severity | None:
 
 
 def _map_severity(raw: str | None) -> tuple[Severity, bool]:
-    """Return (severity, was_mapped). Falls back to MEDIUM and flags it as missing."""
+    """Return (severity, was_mapped). Falls back to medium and flags it as missing."""
     if raw is None:
         return Severity.MEDIUM, False
     key = raw.strip().lower()
@@ -49,7 +48,7 @@ def _map_severity(raw: str | None) -> tuple[Severity, bool]:
     numeric = _map_numeric(key)
     if numeric is not None:
         return numeric, True
-    # Unknown label: do not guess a specific level; use MEDIUM and record the gap.
+    # Unknown label: no guess in a specific level; medium and record the gap.
     return Severity.MEDIUM, False
 
 

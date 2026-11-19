@@ -1,11 +1,4 @@
-"""Reproducible content hashing for acquired datasets.
-
-A ``DatasetManifest`` records a ``local_checksum`` so an acquisition can be
-*verified* later: re-hash the local copy and compare. The hash must be
-reproducible across machines — in particular across the Windows workstation and
-the Linux cloud environment — so the directory hash is made independent of
-filesystem iteration order and of path-separator style.
-"""
+"""Reproducible content hashing for acquired datasets"""
 
 from __future__ import annotations
 
@@ -23,7 +16,7 @@ def sha256_file(path: Path | str, *, chunk_size: int = _CHUNK_SIZE) -> str:
     """Return the hex SHA-256 of a single file, read in streamed chunks.
 
     Streaming keeps memory flat regardless of file size. The chunk size never
-    affects the result (it only changes how many reads happen).
+    affects the result.
     """
     path = Path(path)
     if not path.is_file():
@@ -37,17 +30,14 @@ def sha256_file(path: Path | str, *, chunk_size: int = _CHUNK_SIZE) -> str:
 
 
 def sha256_dir(root: Path | str, *, chunk_size: int = _CHUNK_SIZE) -> str:
-    """Return a reproducible hex SHA-256 over the *content* of a directory tree.
+    """Return a reproducible hex SHA-256 over the content of a directory tree.
 
     The digest folds in every regular file under ``root``:
 
     - relative paths are normalised to POSIX form (``/``) so Windows and Linux
       agree, and sorted so filesystem iteration order never changes the result;
-    - for each file both its relative path AND its own SHA-256 are mixed in, so
-      a content edit *and* a rename/move both change the overall digest.
-
-    Known limitation: symlinks are hashed as whatever ``is_file()`` resolves to;
-    special files and empty directories contribute nothing on their own.
+    - for each file both its relative path and its own SHA-256 are mixed in, so
+      a content edit and a rename/move both change the overall digest.
     """
     root = Path(root)
     if not root.is_dir():

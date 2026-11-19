@@ -5,14 +5,8 @@ Two concerns, kept separate:
 1. The scenario is a well-formed, internally consistent artifact grounded in the
    AIT-ADS 'dnsteal' window (schema validity, honest-conclusion invariants,
    no fabricated ATT&CK mapping).
-2. The EXISTING pipeline runs on it with the deterministic provider (Baseline B)
-   and its OBSERVED behavior is recorded.
-
-Assertions reflect behavior observed when the test was written (the run was
-executed first), not predictions. This is a technical validation of the artifact
-and of the stub's limits on a weak, noisy signal - NOT a performance measurement,
-NOT an LLM evaluation, and NOT a validation of the AIT-ADS time_label as certain
-ground truth. See data/scenarios/scenario_fox_dnsteal.json metadata.
+2. The existing pipeline runs on it with the deterministic provider (Baseline B)
+   and its observed behavior is recorded.
 """
 
 from __future__ import annotations
@@ -48,7 +42,7 @@ def test_scenario_loads_and_is_consistent():
 
 def test_disposition_is_escalate_for_investigation():
     sc = _scenario()
-    # Escalation for INVESTIGATION, not a conclusion that exfiltration occurred.
+    # Escalation for investigation, not a conclusion that exfiltration occurred.
     assert sc.expected_disposition is Disposition.ESCALATE
 
 
@@ -99,7 +93,7 @@ def _run():
 def test_pipeline_runs_baseline_b_deterministic_no_rag():
     _sc, report = _run()
     assert report.llm_provider == "deterministic"
-    # No RAG -> every evidence item is an EVENT; no retrieved KNOWLEDGE/hypotheses.
+    # No RAG -> every evidence item is an event; no retrieved knowledge/hypotheses.
     assert all(e.source_type is SourceType.EVENT for e in report.evidence)
     assert report.hypotheses == []
 
@@ -116,10 +110,7 @@ def test_citations_are_valid():
 
 def test_expected_gap_stub_does_not_reach_escalate():
     sc, report = _run()
-    # OBSERVED gap: the rule-based stub counts failed-auth bursts; this window has
-    # none (the Dovecot events are auth SUCCESS), so it cannot reach the reference
-    # ESCALATE and returns INSUFFICIENT_EVIDENCE. This is a STUB limitation on a
-    # weak signal, not evidence the data is benign. Recorded, not predicted.
+
     assert sc.expected_disposition is Disposition.ESCALATE
     assert report.disposition is Disposition.INSUFFICIENT_EVIDENCE
     assert report.disposition != sc.expected_disposition
@@ -127,5 +118,5 @@ def test_expected_gap_stub_does_not_reach_escalate():
 
 def test_expected_unknowns_present_in_scenario_absent_in_stub():
     sc, report = _run()
-    assert sc.expected_unknowns            # the artifact documents real unknowns
-    assert report.unknowns == []           # the stub emits none (its limitation)
+    assert sc.expected_unknowns
+    assert report.unknowns == []

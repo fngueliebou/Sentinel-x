@@ -1,4 +1,4 @@
-"""Deterministic triage baseline (Baseline A in EVALUATION.md §3)."""
+"""Deterministic triage baseline (Baseline A)"""
 
 from sentinelx.triage.rules import triage
 

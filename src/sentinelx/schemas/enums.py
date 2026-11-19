@@ -16,12 +16,7 @@ class Severity(str, Enum):
 
 
 class Disposition(str, Enum):
-    """Triage disposition.
-
-    ESCALATE / DISMISS mirror the tier-1 close-or-escalate decision. The crucial
-    third value, INSUFFICIENT_EVIDENCE, lets the system abstain rather than guess
-    (conception v0.2 §8; EVALUATION.md §5).
-    """
+    """Triage disposition"""
 
     ESCALATE = "escalate"
     DISMISS = "dismiss"

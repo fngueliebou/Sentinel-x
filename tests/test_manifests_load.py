@@ -1,10 +1,4 @@
-"""Every committed dataset manifest must be valid under the DatasetManifest contract.
-
-These manifests (data/manifests/*.json) are the machine-readable, committed record
-of what has actually been acquired locally. The data itself stays git-ignored; only
-the manifest — provenance, verified license, relative path, content checksum — is
-versioned. This test guarantees each one stays contract-valid and internally honest.
-"""
+"""Every committed dataset manifest must be valid under the DatasetManifest contract"""
 
 from __future__ import annotations
 
@@ -43,6 +37,6 @@ def test_manifest_file_is_valid_and_honest(path: Path):
     # A checksum is recorded and explicitly names its algorithm.
     assert manifest.local_checksum is not None
     assert manifest.local_checksum.startswith("sha256:")
-    # Honesty invariant: a VERIFIED license must cite where it was verified.
+    # Honesty invariant: a verified license must cite where it was verified.
     if manifest.license.verification == LicenseVerification.VERIFIED:
         assert manifest.license.source_url

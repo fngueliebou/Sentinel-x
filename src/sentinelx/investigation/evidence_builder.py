@@ -1,7 +1,7 @@
 """Turn alert telemetry events into addressable Evidence items.
 
 Each event becomes an Evidence with a stable id (EV-EVENT-i). Injection-like
-patterns in the event message are flagged for visibility (never acted upon).
+patterns in the event message are flagged for visibility.
 """
 
 from __future__ import annotations

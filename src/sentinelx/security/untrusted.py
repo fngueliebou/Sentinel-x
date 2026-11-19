@@ -1,16 +1,3 @@
-"""Untrusted-data handling.
-
-Logs, events and knowledge are UNTRUSTED (conception v0.2 §8). Two helpers:
-
-- `detect_injection_patterns`: flags injection-like text so it can be recorded on
-  the evidence. This is INFORMATIONAL ONLY — it never changes control flow and is
-  not claimed to be a reliable defense (it must be *evaluated*, not trusted;
-  EVALUATION.md §8). It is a heuristic for visibility, nothing more.
-- `wrap_as_data`: renders untrusted text inside an explicit data fence so that,
-  when it is later shown to an LLM, instruction/data separation is syntactically
-  marked. The deterministic provider ignores content semantics entirely.
-"""
-
 from __future__ import annotations
 
 import re
@@ -34,9 +21,5 @@ def detect_injection_patterns(text: str) -> list[str]:
 
 
 def wrap_as_data(text: str) -> str:
-    """Fence untrusted text as data for display to an LLM.
-
-    The fence makes instruction/data separation explicit. It is a marker, not a
-    guarantee; robustness is evaluated separately.
-    """
+    """Fence untrusted text as data for display to an LLM"""
     return f"<<UNTRUSTED_DATA>>\n{text}\n<<END_UNTRUSTED_DATA>>"

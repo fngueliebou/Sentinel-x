@@ -1,20 +1,3 @@
-"""Dataset manifest contract: documents a dataset SENTINEL-X uses or considers.
-
-A DatasetManifest records what a dataset is, where it comes from, its license and
-whether that license has actually been *verified* (kept distinct from merely
-naming it), its access/use/redistribution conditions, its intended role in
-evaluation, the ground truth it carries, and — once acquired — where it lives
-locally.
-
-Scientific-honesty design note: the license NAME and the license VERIFICATION
-STATUS are separate fields. A manifest never implies a license is verified just
-because a name is filled in; verification is UNVERIFIED until explicitly set, and
-a VERIFIED license must cite the source used to check it.
-
-This step defines the contract only. Acquisition, the external data folder, and
-the GUIDE integration come later.
-"""
-
 from __future__ import annotations
 
 from enum import Enum
@@ -24,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class DatasetRole(str, Enum):
-    """What a dataset is used for in SENTINEL-X evaluation (a dataset may have several)."""
+    """What a dataset is used for in SENTINEL-X evaluation"""
 
     TRIAGE = "triage"
     INVESTIGATION = "investigation"
@@ -44,13 +27,13 @@ class DatasetStatus(str, Enum):
 class LicenseVerification(str, Enum):
     """Whether the license has actually been checked — separate from its name."""
 
-    UNVERIFIED = "unverified"        # default: not yet checked; do NOT treat as a fact
+    UNVERIFIED = "unverified"        # default: not yet checked
     VERIFIED = "verified"            # checked against a cited source
     NOT_APPLICABLE = "not_applicable"
 
 
 class LicenseInfo(BaseModel):
-    """License name AND the status of its verification, deliberately separated."""
+    """License name and the status of its verification, deliberately separated."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -76,7 +59,7 @@ class LicenseInfo(BaseModel):
 
 
 class DatasetManifest(BaseModel):
-    """Structured documentation of one dataset (candidate or acquired)."""
+    """Structured documentation of one dataset"""
 
     model_config = ConfigDict(extra="forbid")
 

@@ -1,10 +1,4 @@
-"""Tests for the Scenario ground-truth contract (schemas/scenario.py).
-
-We test the *contract behavior*: what a valid scenario accepts, and which
-malformed scenarios are rejected (empty id, unknown field, missing required
-field, and — the important one — a key_evidence_event_id that does not match any
-event in the alert).
-"""
+"""Tests for the Scenario ground-truth contract (schemas/scenario.py)"""
 
 from __future__ import annotations
 
@@ -99,7 +93,7 @@ def test_dangling_key_evidence_is_rejected():
 
 
 def test_default_lists_are_independent_between_instances():
-    # Proves default_factory gives each instance its OWN list (not a shared one).
+    # Proves default_factory gives each instance its own list
     s1 = Scenario(**_minimal_scenario_kwargs())
     s2 = Scenario(**_minimal_scenario_kwargs())
     s1.tags.append("mutated")

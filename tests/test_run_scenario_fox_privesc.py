@@ -1,15 +1,4 @@
-"""End-to-end run test: fox-privesc-shadow through the deterministic pipeline (Baseline B).
-
-Exercises exactly what scripts/run_scenario.py drives: load the Scenario, run the
-EXISTING pipeline on scenario.alert with the deterministic provider and NO RAG, then
-check loading, execution, report structure, citation validity, and the EXPECTED gaps
-between the rule-based stub and the scenario's ground truth.
-
-Assertions reflect the pipeline's OBSERVED behavior (the run was executed before the
-assertions were written), not a prediction. This is a technical validation of the
-pipeline and of the stub's limits - NOT a performance measurement, NOT an LLM
-evaluation, and NOT a validation of the AIT-ADS time_label as certain ground truth.
-"""
+"""End-to-end run test: fox-privesc-shadow through the deterministic pipeline (Baseline B)"""
 
 from __future__ import annotations
 
@@ -21,8 +10,7 @@ from sentinelx.pipeline import run_investigation
 from sentinelx.schemas import Disposition, Scenario, SourceType
 
 _SCENARIO = Path("data/scenarios/scenario_fox_privesc_shadow.json")
-# Pin the deterministic provider explicitly so these tests never depend on the
-# ambient environment / a local .env (reproducibility, conception v0.2 §10).
+# Pin the deterministic provider explicitly so these tests never depend on the ambient environment / a local .env
 # Explicit Settings kwargs take precedence over env and .env in pydantic-settings.
 _DETERMINISTIC = Settings(llm_provider="deterministic")
 
@@ -33,7 +21,7 @@ def _scenario() -> Scenario:
 
 def _run():
     sc = _scenario()
-    # Baseline B: deterministic provider (pinned), NO retrieval (no API, no network).
+    # Baseline B: deterministic provider (pinned), no retrieval (no API, no network).
     report = run_investigation(sc.alert, use_rag=False, settings=_DETERMINISTIC)
     return sc, report
 
@@ -47,18 +35,18 @@ def test_scenario_loads():
 def test_pipeline_runs_baseline_b_deterministic_no_rag():
     _sc, report = _run()
     assert report.llm_provider == "deterministic"
-    # No RAG -> every evidence item is an EVENT; no retrieved KNOWLEDGE, no hypotheses.
+    # No RAG -> every evidence item is an event; no retrieved knowledge, no hypotheses.
     assert all(e.source_type is SourceType.EVENT for e in report.evidence)
     assert report.hypotheses == []
 
 
 def test_report_structure_and_citation_validity():
     _sc, report = _run()
-    # Independent citation check passed: no FACT cites a non-existent evidence id.
+    # Independent citation check passed: no fact cites a non-existent evidence id.
     assert report.verification_passed is True
     evidence_ids = report.evidence_ids()
     for f in report.facts:
-        assert f.citations              # a FACT must cite something
+        assert f.citations              # a fact must cite something
         assert f.supported is True      # and the verifier confirmed it
         assert all(c.evidence_id in evidence_ids for c in f.citations)
     # Observed: one grounded fact per telemetry event (no failed-auth aggregate here).
@@ -78,7 +66,7 @@ def test_key_evidence_is_grounded_in_supported_facts():
 
 def test_expected_gaps_are_observed():
     sc, report = _run()
-    # Disposition gap: the brute-force stub cannot reach the reference ESCALATE on a
+    # Disposition gap: the brute-force stub cannot reach the reference escalate on a
     # privilege-escalation chain (no failed-auth events to count).
     assert sc.expected_disposition is Disposition.ESCALATE
     assert report.disposition is Disposition.INSUFFICIENT_EVIDENCE

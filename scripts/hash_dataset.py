@@ -1,13 +1,4 @@
-"""Compute a reproducible SHA-256 for a dataset file or directory.
-
-Usage (from the repo root):
-    python scripts/hash_dataset.py data/external/ait-ads data/external/microsoft-guide
-
-For a directory it prints the content hash (independent of filesystem order and
-of OS path separators), the number of regular files, and the total size — the
-figures that go into a ``DatasetManifest``. It imports the project's own hashing
-functions, so the result is exactly what verification will later recompute.
-"""
+"""Compute a reproducible SHA-256 for a dataset file or directory."""
 
 from __future__ import annotations
 

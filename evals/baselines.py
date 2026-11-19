@@ -1,5 +1,4 @@
-"""Baseline configurations (EVALUATION.md §3).
-
+"""Baseline configurations (EVALUATION.md).
 For the first slice three configs are runnable offline:
 
 - A  : deterministic triage, NO LLM.
@@ -7,7 +6,7 @@ For the first slice three configs are runnable offline:
 - C  : LLM (default: deterministic stub) + RAG.
 
 D (LLM+RAG+tools) and E (LLM+RAG+tools+independent verification) are defined in
-the protocol but NOT YET IMPLEMENTED as runnable baselines (no tool-execution
+the protocol but not yet implemented as runnable baselines (no tool-execution
 step yet). They are listed here as placeholders so the harness shape is stable.
 """
 

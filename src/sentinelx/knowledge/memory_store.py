@@ -1,9 +1,8 @@
 """In-memory knowledge store with transparent lexical (keyword-overlap) scoring.
 
-This is the DEFAULT store for the first slice: it needs no database and no
-embedding model, so the pipeline and tests run offline. It is intentionally
-simple (lexical token overlap, not BM25, not vector search). The pgvector-backed
-store is a separate, not-yet-wired scaffold (D3 / D8).
+This is the default store for the first slice: it needs no database and no
+embedding model, so the pipeline and tests run offline. The pgvector-backed
+store is a separate, not-yet-wired scaffold
 """
 
 from __future__ import annotations

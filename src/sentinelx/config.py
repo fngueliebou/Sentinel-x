@@ -1,9 +1,4 @@
-"""Runtime configuration, loaded from environment / .env.
-
-Secrets are read from the environment only; nothing is hard-coded. The default
-configuration (deterministic LLM provider, in-memory knowledge store) runs with
-no secrets at all.
-"""
+"""Runtime configuration, loaded from environment / .env"""
 
 from __future__ import annotations
 

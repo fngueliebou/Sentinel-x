@@ -6,18 +6,10 @@ replaces the earlier evals/scenarios/sample_scenarios.json pointer list, which
 duplicated three of these cases as bare `alert_file` references (the raw alert
 fixtures in data/alerts/ remain, used by unit tests). See CHANGELOG.
 
-Records, per EVALUATION.md §10: knowledge version, LLM provider+model, prompt
+Records, per EVALUATION.md: knowledge version, LLM provider+model, prompt
 version, decoding (temperature/seed), per-scenario disposition vs reference
 ground truth, per-baseline agreement, and cost (0.0 for the offline stub). Writes
 a JSON manifest to evals/results/.
-
-This is NOT a scientific benchmark. The suite is five scenarios: three
-hand-authored synthetic cases and two AIT-ADS-grounded reference cases whose
-"ground truth" is a reference-analyst disposition informed by the dataset
-time_label (NOT a certified per-event label). The default analyst is a
-deterministic rule-based stub, so no number here is real-LLM performance.
-
-    python -m evals.run_eval
 """
 
 from __future__ import annotations
@@ -99,13 +91,7 @@ def _initial_context_ground_truth(sc) -> tuple[str, str]:
     """Ground truth a TOOL-LESS baseline (A/B/C) is scored against, plus its basis.
 
     Tool-less baselines only ever see the initial alert context, so they are always
-    scored on INITIAL-CONTEXT triage. The rule is explicit (no implicit fallback):
-
-    - requires_tool_retrieval scenario: the decisive evidence is deliberately withheld
-      from the initial context, so the valid reference is `initial_context_disposition`
-      (a CHOSEN methodological triage reference, not a dataset fact). It is required.
-    - otherwise: the initial context IS the full alert, so the reference is
-      `expected_disposition` (identical to the pre-change behavior -> no regression).
+    scored on INITIAL-CONTEXT triage.
     """
     if sc.requires_tool_retrieval:
         if sc.initial_context_disposition is None:
@@ -147,8 +133,7 @@ def evaluate(settings, store, scenarios) -> dict:
                 "cost_usd": res["cost_usd"],
             }
             if sc.requires_tool_retrieval:
-                # Record (but do NOT score) the post-investigation reference, and spell
-                # out what a match means here so the row is not misread as detection.
+                # Record (but do not score) the post-investigation reference, and spell out what a match means here so the row is not misread as detection.
                 row["post_investigation_reference"] = sc.expected_disposition.value
                 row["match_meaning"] = (
                     "match=true means the initial-context triage matches the chosen "
@@ -182,12 +167,12 @@ def main() -> int:
         "scenario_count": len(scenarios),
         "scenario_ids": [sc.scenario_id for _, sc in scenarios],
         "capability_evaluated": (
-            "Baselines A/B/C evaluate INITIAL-CONTEXT triage WITHOUT tools. For "
+            "Baselines A/B/C evaluate INITIAL-CONTEXT triage without tools. For "
             "requires_tool_retrieval scenarios the decisive evidence is in "
             "retrievable_events (never given to these baselines) and their "
-            "post-investigation disposition is NOT evaluated here (needs Baseline D, "
+            "post-investigation disposition is not evaluated here (needs Baseline D, "
             "not implemented). A match on such a scenario means correct initial-context "
-            "triage against a chosen reference, NOT detection of the compromise."
+            "triage against a chosen reference, not detection of the compromise."
         ),
         "tool_retrieval_scenarios": [
             sc.scenario_id for _, sc in scenarios if sc.requires_tool_retrieval
@@ -210,7 +195,7 @@ def main() -> int:
         "baselines_not_implemented": [k for k, b in BASELINES.items() if not b.implemented],
         "results": per_baseline,
         "disclaimer": (
-            "NOT a scientific benchmark. Hand-authored synthetic + AIT-ADS-grounded "
+            "Not a scientific benchmark. Hand-authored synthetic + AIT-ADS-grounded "
             "reference cases; ground truth = reference-analyst disposition informed by "
             "the dataset time_label, not a certified event_label. Tool-retrieval "
             "scenarios are scored only on initial-context triage (see "

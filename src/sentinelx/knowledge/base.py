@@ -3,7 +3,7 @@
 The interface is deliberately small so a pgvector-backed store (scaffolded in
 pgvector_store.py) can replace the in-memory one without touching callers (D3).
 Every document carries provenance (source, ref, url, version) so retrieval can
-always answer "where did this come from?" (conception §13).
+always answer "where did this come from?"
 """
 
 from __future__ import annotations

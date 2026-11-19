@@ -1,18 +1,7 @@
-#!/usr/bin/env python
 """Descriptive scan of one AIT-ADS Wazuh file against its ground-truth labels.
 
 Streams every alert, labels it benign/attack via the testbed's attack windows,
 and prints counts.
-
-IMPORTANT: the figures below are DESCRIPTIVE DATASET STATISTICS (how the data is
-composed), not detection performance. There is no model here and nothing is being
-predicted; do not read the attack proportion as a precision/recall of any kind.
-
-Usage (from the repo root):
-    python scripts/sample_ait_ads.py \
-        --alerts data/external/ait-ads/fox_wazuh.json \
-        --labels data/external/ait-ads/labels.csv \
-        --scenario fox [--limit 100000]
 """
 
 from __future__ import annotations

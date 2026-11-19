@@ -1,19 +1,11 @@
 """Harness-level checks for evals.run_eval over data/scenarios/*.json.
 
-These assert the EVALUATION MACHINERY and one cross-suite invariant, not a
+These assert the evaluation machinary and one cross-suite invariant, not a
 specific score. Observed behavior (recorded, not predicted):
 
 - Every runnable baseline (A/B/C) is evaluated on every scenario file.
 - For the deterministic stub, RAG (C) never changes the disposition vs no-RAG
-  (B) across the whole suite -> the stub's decision is retrieval-independent.
-
-The fact that the stub MISSES the two fox reference cases is an honest negative
-result; it is asserted at the scenario level (test_run_scenario_fox_privesc.py,
-test_scenario_fox_dnsteal.py), NOT frozen here, so that a future improvement to
-the analyst is not reported as a regression by this file.
-
-The deterministic provider is pinned via Settings so the run never depends on the
-ambient environment / a local .env.
+  (B) across the whole suite -> the stub's decision is retrieval-independent
 """
 
 from __future__ import annotations
@@ -77,8 +69,7 @@ def test_stub_runs_report_zero_cost():
 
 def test_all_rows_are_labelled_initial_context_triage():
     _scenarios, results = _results()
-    # Every row must declare the capability it measures and the basis of its ground
-    # truth, so no comparison is implicit.
+    # Every row must declare the capability it measures and the basis of its ground truth, so no comparison is implicit.
     for key in ("A", "B", "C"):
         for r in results[key]["rows"]:
             assert r["capability_evaluated"] == "triage_initial_context_no_tools"
@@ -89,7 +80,7 @@ def test_all_rows_are_labelled_initial_context_triage():
 
 
 def test_full_context_scenarios_scored_against_expected_disposition():
-    # No regression: scenarios WITHOUT tool retrieval keep being scored against
+    # No regression: scenarios without tool retrieval keep being scored against
     # expected_disposition exactly as before the capability-aware change.
     scenarios, results = _results()
     non_tool = {
@@ -120,9 +111,6 @@ def test_tool_retrieval_scenario_scored_on_initial_context_not_detection():
 
 
 def test_retrievable_events_are_not_fed_to_tool_less_baselines():
-    # The decisive success (christopher.friedman's Dovecot login) lives in
-    # retrievable_events; it must never enter the alert context the baselines run on.
-    # A benign 9701 for another user may be present as initial-context noise.
     scenarios, _ = _results()
     sc = next(sc for _, sc in scenarios if sc.scenario_id == "fox-cracking-webmail-cred")
 

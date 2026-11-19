@@ -1,20 +1,8 @@
-#!/usr/bin/env python
-"""Extract and display the real Wazuh alerts of given attack phase(s) for a testbed.
+"""Extract and display the real Wazuh alerts of given attack phases for a testbed.
 
-Purpose: BEFORE designing a grounded investigation scenario, look at the actual
+Purpose: before designing a grounded investigation scenario, look at the actual
 alert content of the high-value, rare phases (e.g. privilege_escalation, dnsteal,
-cracking) — so the scenario is built from real evidence, not invented.
-
-This reads only alerts whose (time_label) attack matches the requested phase(s).
-It is descriptive inspection, not detection.
-
-Usage (from the repo root):
-    python scripts/extract_ait_ads_attack.py \
-        --alerts data/external/ait-ads/fox_wazuh.json \
-        --labels data/external/ait-ads/labels.csv \
-        --scenario fox \
-        --attack privilege_escalation --attack dnsteal \
-        --limit 20 [--full-log]
+cracking) — so the scenario is built from real evidence.
 """
 
 from __future__ import annotations

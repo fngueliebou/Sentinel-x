@@ -12,11 +12,7 @@ from sentinelx.schemas.event import Event
 
 
 class RawAlert(BaseModel):
-    """An alert as ingested, before normalization.
-
-    Permissive on input (extra fields allowed) because sources are heterogeneous.
-    All string content is UNTRUSTED DATA.
-    """
+    """An alert as ingested, before normalization"""
 
     model_config = ConfigDict(extra="allow")
 
@@ -44,7 +40,7 @@ class NormalizedAlert(BaseModel):
     severity: Severity = Field(..., description="Mapped onto the controlled Severity vocabulary.")
     entities: list[str] = Field(default_factory=list)
     events: list[Event] = Field(default_factory=list)
-    # Fields that could not be derived are recorded, not invented (conception §8).
+    # Fields that could not be derived are recorded, not invented.
     missing_fields: list[str] = Field(
         default_factory=list, description="Expected fields absent from the raw alert."
     )

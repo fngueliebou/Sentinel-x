@@ -26,7 +26,7 @@ def test_e2e_report_has_all_sections_shape(settings):
     report = run_investigation_from_file(
         "data/alerts/sample_alert_bruteforce.json", settings=settings
     )
-    # facts/hypotheses/unknowns/recommendations are present as lists (some may be empty).
+    # facts/hypotheses/unknowns/recommendations are present as lists.
     assert isinstance(report.facts, list)
     assert isinstance(report.hypotheses, list)
     assert isinstance(report.unknowns, list)

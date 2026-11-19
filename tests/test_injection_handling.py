@@ -1,13 +1,3 @@
-"""Hostile data handling.
-
-Contract tested here: event content is treated as DATA. An injected instruction
-inside an event message must (a) be flagged, and (b) NOT change the disposition.
-
-Scope: this exercises the pipeline's data/instruction separation and the
-deterministic provider. It does NOT measure a real LLM's robustness — that is
-NOT YET MEASURED (see EVALUATION.md §8).
-"""
-
 from __future__ import annotations
 
 from sentinelx.security import detect_injection_patterns
@@ -45,11 +35,6 @@ def test_no_injection_flag_on_clean_alert(settings):
     report = run_investigation_from_file(
         "data/alerts/sample_alert_bruteforce.json", settings=settings
     )
-    # A clean alert must not flag its own telemetry (EVENT evidence). Retrieved
-    # KNOWLEDGE is a separate concern: curated security knowledge can legitimately
-    # contain terms (e.g. "exfiltrate", "run command") that trip the injection
-    # heuristic, and the detector is deliberately still applied to it for
-    # RAG-poisoning visibility. So this property is asserted on EVENT evidence only.
     event_evidence = [e for e in report.evidence if e.source_type is SourceType.EVENT]
     assert event_evidence  # sanity: the clean alert does carry telemetry
     assert all(not e.untrusted_flags for e in event_evidence)

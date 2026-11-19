@@ -10,11 +10,7 @@ from sentinelx.schemas import Disposition, Evidence, Finding, NormalizedAlert
 
 
 class AnalysisRequest(BaseModel):
-    """Everything a provider needs to analyze one alert.
-
-    `evidence` is the ONLY material a provider may ground factual claims on. All
-    evidence content is untrusted data.
-    """
+    """Everything a provider needs to analyze one alert"""
 
     model_config = ConfigDict(extra="forbid")
 

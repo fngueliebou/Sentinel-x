@@ -1,17 +1,8 @@
 """Label-quality diagnostics for AIT-ADS Wazuh alerts.
 
-Purpose: BEFORE training any model, check whether our ground-truth labels are
+Purpose: efore training any model, check whether our ground-truth labels are
 too easily separable by the detection rules themselves, and how much the
 time-window labeling inflates/attributes the attack class.
-
-Important: our labels are a reconstructed ``time_label`` (an alert is 'attack'
-iff its timestamp falls in an attack window from labels.csv). The richer
-per-event ``event_label`` from the official AIT-ADS tooling is NOT present in the
-distributed Zenodo record and is not used here. A time-window label marks every
-alert during an attack phase as 'attack', including unrelated background noise —
-so these are label-quality diagnostics, never detection performance.
-
-This module computes only descriptive aggregates; it selects no model.
 """
 
 from __future__ import annotations
@@ -55,7 +46,7 @@ class RuleStat:
 
     @property
     def is_ambiguous(self) -> bool:
-        """Fires in BOTH attack and benign periods -> label is not rule-intrinsic."""
+        """Fires in both attack and benign periods -> label is not rule-intrinsic."""
         return self.attack > 0 and self.benign > 0
 
 
@@ -100,7 +91,7 @@ class RuleDiagnostics:
 
     @property
     def attack_alerts_on_benign_capable_rules(self) -> int:
-        """Attack-labeled alerts whose rule ALSO fires benign: evidence the label
+        """Attack-labeled alerts whose rule also fires benign: evidence the label
         is temporal (window co-occurrence), not intrinsic to the rule."""
         return sum(r.attack for r in self.rules.values() if r.benign > 0)
 

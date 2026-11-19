@@ -1,9 +1,4 @@
-"""Pydantic data contracts for SENTINEL-X.
-
-These schemas are the stable interface between modules. They are defined BEFORE
-the components that produce/consume them (conception v0.2, §3). Everything that
-crosses a module boundary is a typed, validated object.
-"""
+"""Pydantic data contracts for SENTINEL-X"""
 
 from sentinelx.schemas.enums import Disposition, FindingKind, Severity, SourceType
 from sentinelx.schemas.alert import RawAlert, NormalizedAlert

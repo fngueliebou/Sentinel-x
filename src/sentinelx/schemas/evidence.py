@@ -1,9 +1,4 @@
-"""Evidence and citation contracts.
-
-Evidence is the only thing a factual claim may rest on. Every Evidence item has a
-stable id; a Citation in the report MUST reference an id that exists in the
-investigation's evidence set. The verifier enforces this (no dangling citations).
-"""
+"""Evidence and citation contracts"""
 
 from __future__ import annotations
 
@@ -16,9 +11,7 @@ class Evidence(BaseModel):
     """A single, addressable piece of evidence available to the analysis.
 
     Produced from telemetry events, retrieved knowledge, or alert fields. Content
-    is UNTRUSTED DATA. `untrusted_flags` records injection-like patterns detected in
-    the content; these are informational only and never alter control flow.
-    """
+    is untrusted data"""
 
     model_config = ConfigDict(extra="forbid")
 

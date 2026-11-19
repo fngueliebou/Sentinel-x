@@ -1,8 +1,4 @@
-"""Non-regression tests for the deterministic provider's recommendations.
-
-Guards against the duplicate / false-positive scanner-check recommendation that
-used to be emitted once per knowledge item mentioning "scanner" OR "benign".
-"""
+"""Non-regression tests for the deterministic provider's recommendations"""
 
 from __future__ import annotations
 

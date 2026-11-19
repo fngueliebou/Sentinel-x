@@ -3,36 +3,16 @@
 A Scenario wraps an input alert together with the ground truth an investigation
 should recover: the reference conclusion, the techniques, the decisive evidence,
 what must stay unknown, and the actions that are / are not allowed. It is what
-lets us evaluate an *investigation* (EVALUATION.md, family I), not merely a
-triage label.
+lets us evaluate an investigation, not merely a triage label.
 
 Design choices:
-- The alert is embedded as a `RawAlert` (composition), NOT re-declared, so there
+- The alert is embedded as a `RawAlert` (composition), not re-declared, so there
   is a single source of truth for the alert/event shape (schemas/alert.py).
 - Strict validation (`extra="forbid"`) matches the other output-side schemas, so
   a malformed scenario fails fast instead of silently carrying junk.
 - A cross-field validator guarantees that `key_evidence_event_ids` only names
   events that actually exist (in the initial alert OR the retrievable set) — the
   same "no dangling reference" principle the citation verifier enforces.
-
-`expected_techniques` — canonical definition (EVALUATION.md, applied consistently):
-- SYNTHETIC scenarios: the techniques the scenario was DESIGNED to represent
-  (ground truth by construction).
-- REAL (dataset-grounded) scenarios: ONLY techniques ESTABLISHED by the telemetry
-  itself — the technique's defining behavior is directly logged, is not reasonably
-  explained by benign activity, does NOT depend on attribution to an adversary, and
-  does NOT rely on the dataset `time_label`. Anything merely "consistent with",
-  inferred from a pattern, or attribution-dependent is a CANDIDATE and lives in
-  `metadata` (e.g. `attack_candidates`) as a hypothesis, never presented as confirmed.
-
-N3 / tool-retrieval scenarios:
-- `retrievable_events` holds telemetry that a (future) read-only tool layer would
-  return; it is NOT part of the initial alert context handed to triage.
-- `initial_context_disposition` is the reference triage decision on the initial
-  context ALONE. It is a methodologically CHOSEN reference, not a dataset-provided
-  fact.
-- `requires_tool_retrieval=True` marks the scenario as NOT end-to-end runnable until
-  a tool-execution step (Baseline D) exists.
 """
 
 from __future__ import annotations
@@ -80,9 +60,9 @@ class Scenario(BaseModel):
     expected_techniques: list[str] = Field(
         default_factory=list,
         description=(
-            "MITRE ATT&CK technique ids ESTABLISHED by this scenario (see module "
+            "MITRE ATT&CK technique ids establish by this scenario (see module "
             "docstring for the canonical synthetic-vs-real rule). Candidate/hypothesis "
-            "techniques do NOT go here; they belong in metadata.attack_candidates."
+            "techniques do not go here; they belong in metadata.attack_candidates."
         ),
     )
     key_evidence_event_ids: list[str] = Field(
@@ -106,7 +86,7 @@ class Scenario(BaseModel):
     retrievable_events: list[Event] = Field(
         default_factory=list,
         description=(
-            "Telemetry a (future) read-only tool layer would return. NOT part of the "
+            "Telemetry a (future) read-only tool layer would return. Not part of the "
             "initial alert context; never fed to tool-less baselines. Ids must be "
             "disjoint from alert.events."
         ),
@@ -114,7 +94,7 @@ class Scenario(BaseModel):
     initial_context_disposition: Disposition | None = Field(
         default=None,
         description=(
-            "Reference triage decision on the INITIAL context alone (trigger + "
+            "Reference triage decision on the initial context alone (trigger + "
             "distractors, no retrievable_events). A chosen methodological reference, "
             "not a dataset-provided fact. Set it for tool-retrieval scenarios."
         ),
@@ -122,7 +102,7 @@ class Scenario(BaseModel):
     requires_tool_retrieval: bool = Field(
         default=False,
         description=(
-            "True marks the scenario as NOT end-to-end runnable until a tool-execution "
+            "True marks the scenario as not end-to-end runnable until a tool-execution "
             "step (Baseline D) exists. The decisive evidence lives in retrievable_events."
         ),
     )
@@ -135,27 +115,14 @@ class Scenario(BaseModel):
 
     @model_validator(mode="after")
     def _event_ids_are_consistent(self) -> Self:
-        """Validate event-id consistency across the initial and retrievable sets.
-
-        Runs AFTER the model is built (mode="after"), so `self.alert` is a validated
-        RawAlert. Two guarantees, the scenario-side analogue of the report citation
-        check (no reference to evidence that does not exist):
-
-        1. No id collision between `alert.events` (initial context) and
-           `retrievable_events` (tool-returnable) — a single event must not live in both.
-        2. Every id in `key_evidence_event_ids` matches a real event in EITHER set.
-
-        This validates ID CONSISTENCY ONLY. It does NOT (and cannot) verify that a
-        future tool layer will actually return the retrievable_events — that capability
-        is deferred (Baseline D).
-        """
+        """Validate event-id consistency across the initial and retrievable sets"""
         initial_ids = {event.id for event in self.alert.events}
         retrievable_ids = {event.id for event in self.retrievable_events}
 
         collisions = initial_ids & retrievable_ids
         if collisions:
             raise ValueError(
-                "event id(s) appear in BOTH alert.events and retrievable_events: "
+                "event id(s) appear in both alert.events and retrievable_events: "
                 f"{sorted(collisions)}. An event belongs to one set only."
             )
 

@@ -1,22 +1,11 @@
-#!/usr/bin/env python
 """Run one investigation Scenario through the deterministic pipeline.
 
-Baseline B (default)   : deterministic provider, NO retrieval.
+Baseline B (default)   : deterministic provider, No retrieval.
 Baseline C (--rag)     : deterministic provider + RAG over the sample knowledge store.
 
-Loads a Scenario (which also carries its ground truth), runs the EXISTING pipeline
-on scenario.alert, prints the structured report, then a DESCRIPTIVE comparison
+Loads a Scenario (which also carries its ground truth), runs the existing pipeline
+on scenario.alert, prints the structured report, then a descriptive comparison
 against the scenario's expectations.
-
-This is a technical validation of the pipeline and an observation of the
-deterministic provider's limits. It is NOT a performance measurement, NOT an LLM
-evaluation, and does NOT validate the AIT-ADS time_label as certain ground truth.
-It reuses only public functions; it changes nothing in src/, evals/ or the schemas.
-No API, no network (the deterministic provider and the in-memory store are offline).
-
-Usage:
-    python scripts/run_scenario.py data/scenarios/scenario_fox_privesc_shadow.json
-    python scripts/run_scenario.py data/scenarios/scenario_fox_privesc_shadow.json --rag
 """
 
 from __future__ import annotations
@@ -30,17 +19,12 @@ from sentinelx.schemas import InvestigationReport, Scenario, SourceType
 
 
 def load_scenario(path: str | Path) -> Scenario:
-    """Load and validate a Scenario JSON (ground truth included)."""
+    """Load and validate a Scenario JSON (ground truth included)"""
     return Scenario.model_validate(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
 def run_pipeline(scenario: Scenario, *, use_rag: bool) -> InvestigationReport:
-    """Run the existing pipeline with the deterministic provider.
-
-    use_rag=False -> Baseline B (no retrieval). use_rag=True -> Baseline C
-    (deterministic + RAG over the sample store). run_investigation loads the sample
-    store itself when use_rag is True. No API, no network either way.
-    """
+    """Run the existing pipeline with the deterministic provider"""
     return run_investigation(scenario.alert, use_rag=use_rag)
 
 
@@ -59,7 +43,7 @@ def _print_findings(title: str, findings) -> None:
 
 
 def _evidence_for_event(report: InvestigationReport, event_id: str):
-    """Return the Evidence built from a given scenario event id (source_ref=event:<id>)."""
+    """Return the Evidence built from a given scenario event id"""
     target = f"event:{event_id}"
     for e in report.evidence:
         if e.source_ref == target:
@@ -98,9 +82,9 @@ def print_report_and_comparison(
     _print_findings("UNKNOWNS", report.unknowns)
     _print_findings("RECOMMENDATIONS", report.recommendations)
 
-    # ---------- Descriptive comparison vs scenario ground truth (NOT a score) ----------
+    # ---------- Descriptive comparison vs scenario ground truth (Not a score) ----------
     print("\n" + "-" * 72)
-    print("DESCRIPTIVE COMPARISON vs scenario expectations (observed gaps, not scoring):")
+    print("Descriptive comparaison vs scenario expectations (observed gaps, not scoring):")
 
     same = report.disposition == scenario.expected_disposition
     print(
@@ -108,8 +92,8 @@ def print_report_and_comparison(
         f"scenario reference '{scenario.expected_disposition.value}'  |  "
         f"{'MATCH' if same else 'DIFFERENT'}"
     )
-    print("    (The scenario's expected_disposition is the reference TRIAGE DECISION a correct")
-    print("     investigation should reach - NOT the AIT-ADS attack-phase label 'privilege_escalation'.)")
+    print("    (The scenario's expected_disposition is the reference triage decision a correct")
+    print("     investigation should reach - not the AIT-ADS attack-phase label 'privilege_escalation'.)")
 
     print("\n  key evidence grounded as supported facts:")
     supported_fact_citations = {
@@ -118,14 +102,14 @@ def print_report_and_comparison(
     for eid in scenario.key_evidence_event_ids:
         ev = _evidence_for_event(report, eid)
         if ev is None:
-            print(f"    - {eid}: NOT present in the evidence set")
+            print(f"    - {eid}: not present in the evidence set")
         elif ev.id in supported_fact_citations:
             print(f"    - {eid} -> {ev.id}: grounded in a supported fact")
         else:
             print(f"    - {eid} -> {ev.id}: present, but not cited by any supported fact")
 
-    # ATT&CK coverage: do the EXPECTED techniques appear in the RETRIEVED knowledge?
-    # This reports documentary coverage for THIS case only - never an RAG efficacy claim.
+    # ATT&CK coverage: do the expected techniques appear in the retrieved knowledge
+    # This reports documentary coverage for this case only - never an RAG efficacy claim.
     kb = [e for e in report.evidence if e.source_type is SourceType.KNOWLEDGE]
     print(f"\n  expected ATT&CK techniques (scenario): {scenario.expected_techniques}")
     if not kb:
@@ -134,7 +118,7 @@ def print_report_and_comparison(
         for tech in scenario.expected_techniques:
             haystack = " ".join(f"{e.source_ref} {e.content}" for e in kb).lower()
             found = tech.lower() in haystack
-            print(f"    {tech}: {'present in retrieved knowledge' if found else 'NOT present in retrieved knowledge (coverage gap for THIS case)'}")
+            print(f"    {tech}: {'present in retrieved knowledge' if found else 'not present in retrieved knowledge (coverage gap for this case)'}")
     print("    (The deterministic provider produces no ATT&CK mapping of its own.)")
 
     print(f"\n  scenario legitimate unknowns: {len(scenario.expected_unknowns)}  |  "

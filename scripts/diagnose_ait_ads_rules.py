@@ -1,19 +1,8 @@
-#!/usr/bin/env python
 """Rule-composition diagnostic for one AIT-ADS Wazuh file vs its time-window labels.
 
-Goal: check, BEFORE any modeling, whether the (reconstructed time_label) classes
+Goal: check, b4 any modeling, whether the (reconstructed time_label) classes
 are trivially separable by the Wazuh rules, and how much the window labeling
 attributes 'attack' to background noise.
-
-These are LABEL-QUALITY / DATASET statistics, NOT detection performance. Our
-labels are a time_label (alert timestamp within an attack window); the official
-per-event event_label is not in the distributed dataset and is not used here.
-
-Usage (from the repo root):
-    python scripts/diagnose_ait_ads_rules.py \
-        --alerts data/external/ait-ads/fox_wazuh.json \
-        --labels data/external/ait-ads/labels.csv \
-        --scenario fox [--top 15] [--limit N]
 """
 
 from __future__ import annotations
@@ -42,7 +31,7 @@ def _print_rule_table(rules, total: int, *, title: str) -> None:
 def _report(diag: RuleDiagnostics, scenario: str, top: int) -> None:
     print(f"AIT-ADS rule diagnostic  scenario={scenario}  source=wazuh")
     print("  label basis: reconstructed TIME_LABEL (timestamp in attack window);")
-    print("               official event_label NOT available/used.")
+    print("               official event_label not available/used.")
     print(f"  alerts:            {diag.total}")
     print(f"  attack (time_label): {diag.attack} ({_pct(diag.attack, diag.total)})")
     print(f"  benign:              {diag.benign} ({_pct(diag.benign, diag.total)})")
@@ -67,7 +56,7 @@ def _report(diag: RuleDiagnostics, scenario: str, top: int) -> None:
     # Ambiguous rules (fire in both classes)
     ambiguous = diag.ambiguous_rules()
     amb_attack = sum(r.attack for r in ambiguous)
-    print(f"\n  Ambiguous rules (fire in BOTH attack and benign): {len(ambiguous)}")
+    print(f"\n  Ambiguous rules (fire in noth attack and benign): {len(ambiguous)}")
     _print_rule_table(ambiguous[:top], diag.total, title="   (top ambiguous)")
 
     # Trivially separating
@@ -81,7 +70,7 @@ def _report(diag: RuleDiagnostics, scenario: str, top: int) -> None:
     # Leakage / temporal-label evidence
     leaked = diag.attack_alerts_on_benign_capable_rules
     print("\n  TEMPORAL-LABEL EVIDENCE:")
-    print(f"    attack-labeled alerts whose rule ALSO fires benign: {leaked} "
+    print(f"    attack-labeled alerts whose rule also fires benign: {leaked} "
           f"({_pct(leaked, diag.attack)} of attack alerts)")
     print(f"    ambiguous attack alerts total: {amb_attack} ({_pct(amb_attack, diag.attack)} of attack)")
     print("    -> these alerts are 'attack' only because of the time window, not the rule.")
@@ -90,7 +79,7 @@ def _report(diag: RuleDiagnostics, scenario: str, top: int) -> None:
     print("    - time_label is temporal co-occurrence, not causation (label noise in positives).")
     print("    - no event_label available -> per-alert causal truth not checked here.")
     print("    - rule.id/description/groups absence counted above; such alerts can't be rule-classified.")
-    print("    - descriptive dataset statistics, NOT detection performance.")
+    print("    - descriptive dataset statistics, not detection performance.")
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -1,7 +1,7 @@
 """Tests for the DatasetManifest contract (schemas/dataset_manifest.py).
 
 Covers: a valid minimal manifest, required fields, invalid values, and — the key
-point — that naming a license is NOT the same as verifying it.
+point — that naming a license is not the same as verifying it.
 """
 
 from __future__ import annotations
@@ -76,8 +76,8 @@ def test_invalid_role_value_is_rejected():
 
 
 def test_naming_a_license_does_not_make_it_verified():
-    # A license NAME is filled in, but verification is NOT set: it must stay
-    # UNVERIFIED. Naming a license is not the same as verifying it.
+    # A license name is filled in, but verification is not set: it must stay
+    # Unverified. Naming a license is not the same as verifying it.
     kwargs = _minimal()
     kwargs["license"] = {"name": "CDLA-Permissive-2.0"}
     manifest = DatasetManifest.model_validate(kwargs)
@@ -86,7 +86,7 @@ def test_naming_a_license_does_not_make_it_verified():
 
 
 def test_verified_license_requires_a_source_url():
-    # Claiming VERIFIED without citing where it was verified is rejected.
+    # Claiming verified without citing where it was verified is rejected.
     kwargs = _minimal()
     kwargs["license"] = {"name": "CDLA-Permissive-2.0", "verification": "verified"}
     with pytest.raises(ValidationError):

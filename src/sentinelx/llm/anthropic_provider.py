@@ -1,13 +1,8 @@
-"""Real Claude provider — OPTIONAL, NOT exercised by the default end-to-end suite.
+"""Real Claude provider — Not exercised by the default end-to-end suite.
 
 Kept minimal and defensive. It fences all evidence as untrusted data and asks for
 a strict JSON structure. Correctness and robustness of a real LLM here are
-NOT YET MEASURED (see EVALUATION.md). Requires the [llm] extra and an API key.
-
-Response handling is defensive: the model's reply is parsed and validated against
-the ProviderOutput contract, and any parsing/validation failure is raised as an
-explicit ``AnthropicResponseError`` — never silently replaced by a deterministic
-answer. API/network errors from the SDK propagate unchanged, also with no fallback.
+not yet measured.
 """
 
 from __future__ import annotations
@@ -26,13 +21,7 @@ class AnthropicResponseError(RuntimeError):
 
 
 def _unwrap_code_fence(text: str) -> str:
-    """Return the payload, unwrapping a SINGLE leading Markdown code fence if present.
-
-    If the reply is wrapped in ``` ... ``` (optionally ```json), the fenced block is
-    returned. Otherwise the text is returned unchanged. This never hunts for a JSON
-    substring inside prose: a malformed body then surfaces as a parse error rather
-    than being silently "repaired".
-    """
+    """Return the payload, unwrapping a single leading Markdown code fence if present"""
     stripped = text.strip()
     if not stripped.startswith("```"):
         return stripped
@@ -44,12 +33,7 @@ def _unwrap_code_fence(text: str) -> str:
 
 
 def _findings_payload(data: dict[str, Any], key: str, kind: str) -> list[dict[str, Any]]:
-    """Shape the model's finding items into Finding input dicts.
-
-    Only reshapes (and checks the coarse list/object shape); field types and the
-    FACT-must-cite rule are validated by ProviderOutput/Finding, so the schema stays
-    the single source of validation truth.
-    """
+    """Shape the model's finding items into Finding input dicts"""
     items = data.get(key, [])
     if not isinstance(items, list):
         raise AnthropicResponseError(f"field '{key}' must be a list, got {type(items).__name__}.")
@@ -88,11 +72,7 @@ class AnthropicProvider:
         return "\n".join(lines)
 
     def _build_output(self, text: str) -> ProviderOutput:
-        """Parse + validate the model text into a ProviderOutput. Explicit errors only.
-
-        Raises AnthropicResponseError on any malformed / invalid reply, preserving the
-        underlying cause. Never returns a deterministic stand-in.
-        """
+        """Parse + validate the model text into a ProviderOutput"""
         payload = _unwrap_code_fence(text)
         try:
             data = json.loads(payload)
@@ -146,8 +126,7 @@ class AnthropicProvider:
             "recommendations. Each finding: {statement, citations:[{evidence_id}]}."
         )
 
-        # API/network errors from the SDK propagate unchanged - never replaced by a
-        # deterministic answer.
+        # API/network errors from the SDK propagate unchanged - never replaced by a deterministic answer.
         client = anthropic.Anthropic(api_key=self._api_key)
         resp = client.messages.create(
             model=self._model,

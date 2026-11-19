@@ -15,10 +15,7 @@ def load_raw_alert_from_dict(payload: dict[str, Any]) -> RawAlert:
 
 
 def load_raw_alert(path: str | Path) -> RawAlert:
-    """Load and validate a single raw alert from a JSON file.
-
-    The file content is untrusted data; parsing it as JSON never executes anything.
-    """
+    """Load and validate a single raw alert from a JSON file"""
     text = Path(path).read_text(encoding="utf-8")
     payload = json.loads(text)
     return load_raw_alert_from_dict(payload)

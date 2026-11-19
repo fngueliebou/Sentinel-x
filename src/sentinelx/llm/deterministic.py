@@ -1,15 +1,4 @@
-"""Offline, rule-based stand-in for an LLM analyst.
-
-Why this exists: it lets the full end-to-end slice run and be tested with no API
-key and no network, and it gives the evaluation harness a reproducible reference.
-It is NOT a language model and makes no NLU claims.
-
-Grounding guarantee (by construction): every FACT it emits cites an evidence id
-that is present in the request's evidence set. It derives its disposition only
-from STRUCTURED signals (counts of failed-auth events), never from the free-text
-content of events — so injected instructions inside event text cannot change its
-decision. This is a property of the stub, not evidence that a real LLM is robust.
-"""
+"""Offline, rule-based stand-in for an LLM analyst"""
 
 from __future__ import annotations
 
@@ -117,7 +106,7 @@ class DeterministicProvider:
                 )
             )
 
-        # Disposition from STRUCTURED signal only.
+        # Disposition from structured signal only.
         if not event_ev:
             disposition = Disposition.INSUFFICIENT_EVIDENCE
             summary = "No telemetry available; cannot substantiate a disposition."

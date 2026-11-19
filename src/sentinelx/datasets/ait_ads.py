@@ -7,10 +7,7 @@ support (no stable id, epoch timestamps, no severity) comes in a later step.
 
 The alert files are JSON Lines (one JSON object per line) and can reach several
 hundred MB, so records are streamed one line at a time — the whole file is never
-loaded into memory at once.
-
-All alert content is UNTRUSTED DATA: it is copied into ``RawAlert`` as-is and is
-never executed or interpreted as instructions (conception v0.2, §8).
+loaded into memory at once
 """
 
 from __future__ import annotations
@@ -52,13 +49,7 @@ def _collect_entities(record: dict[str, Any]) -> list[str]:
 
 
 def wazuh_record_to_raw_alert(record: dict[str, Any]) -> RawAlert:
-    """Map one parsed Wazuh JSON record to a ``RawAlert``.
-
-    Required fields (``id``, ``@timestamp``) are validated and the function fails
-    loudly if they are absent — a malformed record is never silently dropped or
-    filled with invented values. Everything else degrades to ``None``/empty, and
-    the complete original record is preserved verbatim in ``raw``.
-    """
+    """Map one parsed Wazuh JSON record to a ``RawAlert``"""
     rule = record.get("rule") or {}
 
     alert_id = record.get("id")
@@ -94,11 +85,7 @@ def wazuh_record_to_raw_alert(record: dict[str, Any]) -> RawAlert:
 
 
 def iter_wazuh_alerts(path: Path | str) -> Iterator[RawAlert]:
-    """Yield ``RawAlert``s from a Wazuh JSON-Lines file, streamed line by line.
-
-    Blank lines are skipped. The file is never read wholesale, so a 600 MB file
-    is processed with flat memory.
-    """
+    """Yield ``RawAlert``s from a Wazuh JSON-Lines file, streamed line by line"""
     path = Path(path)
     with path.open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -142,11 +129,7 @@ def iter_alerts_for_attacks(
 
 @dataclass
 class ScanSummary:
-    """Descriptive counts from a labeled scan of one Wazuh file.
-
-    These are DATASET statistics (how the data is composed), not detection
-    performance — there is no model here, nothing is being predicted.
-    """
+    """Descriptive counts from a labeled scan of one Wazuh file"""
 
     total: int
     benign: int
@@ -162,11 +145,7 @@ class ScanSummary:
 def summarize_labeled_wazuh(
     path: Path | str, windows: list[AttackWindow], *, limit: int | None = None
 ) -> ScanSummary:
-    """Stream a Wazuh file, label each alert, and return descriptive counts.
-
-    ``limit`` stops after N alerts (quick look); ``None`` scans the whole file.
-    Streaming keeps memory flat regardless of file size.
-    """
+    """Stream a Wazuh file, label each alert, and return descriptive counts"""
     total = 0
     benign = 0
     per_attack: Counter[str] = Counter()

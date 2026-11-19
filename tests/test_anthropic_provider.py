@@ -1,9 +1,4 @@
-"""Unit tests for AnthropicProvider response handling - NO network, NO API key.
-
-A fake 'anthropic' module is injected into sys.modules, so analyze() runs its real
-parsing/validation path WITHOUT contacting the API. These tests verify the TECHNICAL
-contract and error handling only - NOT the analytical quality of any real model.
-"""
+"""Unit tests for AnthropicProvider response handling - NO network, NO API key"""
 
 from __future__ import annotations
 
@@ -22,8 +17,7 @@ class _FakeAPIError(Exception):
 
 
 def _install_fake_anthropic(monkeypatch, *, text=None, exc=None, usage=(11, 22)) -> None:
-    """Inject a fake 'anthropic' module whose Anthropic().messages.create() returns a
-    response carrying `text`, or raises `exc`. No real SDK, no network."""
+
     module = types.ModuleType("anthropic")
 
     class _Block:

@@ -1,6 +1,6 @@
 """Loading + integrity test for the fox-privesc-shadow reference scenario.
 
-This scenario is grounded in 10 REAL AIT-ADS fox Wazuh alerts (extracted via
+This scenario is grounded in 10 real AIT-ADS fox Wazuh alerts (extracted via
 scripts/extract_ait_ads_attack.py). The test checks it validates against the
 Scenario contract and that its ids, provenance and ground-truth fields are
 coherent. It does NOT assert anything about detection performance.
@@ -24,7 +24,7 @@ def _load() -> Scenario:
 def test_scenario_loads_and_core_fields():
     sc = _load()
     assert sc.scenario_id == "fox-privesc-shadow"
-    # 'escalate' is a triage DECISION from the real enum (not a 'true_positive' class).
+    # 'escalate' is a triage decision from the real enum (not a 'true_positive' class).
     assert sc.expected_disposition is Disposition.ESCALATE
     assert sc.reference_conclusion.strip()
 
@@ -38,7 +38,7 @@ def test_ten_real_events_with_unique_ids():
 
 def test_event_provenance_is_preserved():
     sc = _load()
-    # Every event keeps its original Wazuh id and these are all distinct (real alerts).
+    # Every event keeps its original Wazuh id & these are all distinct (real alerts).
     originals = [e.attributes.get("original_wazuh_id") for e in sc.alert.events]
     assert all(originals)
     assert len(set(originals)) == 10
@@ -58,7 +58,7 @@ def test_key_evidence_subset_and_shadow_present():
 
 def test_attack_techniques_are_only_the_observed_ones():
     sc = _load()
-    # Observed-execution techniques only; T1078 / T1505.003 are NOT asserted here.
+    # Observed-execution techniques only; T1078 / T1505.003 are not asserted here.
     assert sc.expected_techniques == ["T1548.003", "T1003.008"]
 
 

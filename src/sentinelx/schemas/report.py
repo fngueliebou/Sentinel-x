@@ -1,8 +1,8 @@
 """Investigation report contract.
 
 The report separates facts / hypotheses / unknowns / recommendations and carries
-the evidence set it was built from. A FACT with no valid citation is a contract
-violation that the verifier flags (conception v0.2 §3; EVALUATION.md §7.b).
+the evidence set it was built from. A fact with no valid citation is a contract
+violation that the verifier flags
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ class Finding(BaseModel):
         # A FACT must carry at least one citation (validity of the id is checked
         # later by the verifier against the actual evidence set).
         if self.kind == FindingKind.FACT and not self.citations:
-            raise ValueError("A FACT finding must have at least one citation.")
+            raise ValueError("A fact finding must have at least one citation.")
         return self
 
 

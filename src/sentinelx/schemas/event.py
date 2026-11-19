@@ -1,9 +1,4 @@
-"""Telemetry event contract.
-
-An Event is a single piece of telemetry supplied alongside an alert (e.g. an
-authentication record). Event content is UNTRUSTED DATA: it may contain text that
-looks like instructions. It is never treated as instructions (conception v0.2 §8).
-"""
+"""Telemetry event contract"""
 
 from __future__ import annotations
 

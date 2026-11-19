@@ -1,6 +1,6 @@
-"""pgvector-backed knowledge store — SCAFFOLD, NOT YET WIRED.
+"""pgvector-backed knowledge store — SCAFFOLD, not yet wired.
 
-Placeholder for the PostgreSQL + pgvector adapter (D3). It is intentionally not
+Placeholder for the PostgreSQL + pgvector adapter. It is intentionally not
 implemented: the in-memory store is the default for the first slice, and a real
 vector store requires an embedding-model decision (recorded as an ADR) before it
 earns its place. Left here so the interface boundary is visible.
